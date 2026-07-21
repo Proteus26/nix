@@ -151,6 +151,7 @@
     mpv
 		ghidra
 		onlyoffice-desktopeditors
+		stremio-linux-shell
   ];
 
 	# Hyprland initialization
@@ -265,8 +266,6 @@
   services.blueman.enable = true;
 
 	services.printing.enable = true;
-
-  services.flatpak.enable = true;
 
 	security.rtkit.enable = true;
 
