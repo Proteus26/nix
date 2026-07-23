@@ -98,6 +98,8 @@
 		python3
 		nodejs
 		pnpm
+		gnumake
+		cmake
 
 		# Dev tools
     git
@@ -109,6 +111,8 @@
 		man
 		man-pages
 		man-pages-posix
+		gtest
+		openssl
 
 		# CLI tools
 		wget
@@ -163,7 +167,6 @@
   xdg.portal = {
     enable = true;
     extraPortals = with pkgs; [
-      xdg-desktop-portal-hyprland
       xdg-desktop-portal-gtk
     ];
     config = {
@@ -208,6 +211,7 @@
       nerd-fonts.symbols-only
       noto-fonts
       noto-fonts-cjk-sans
+			noto-fonts-cjk-serif
       noto-fonts-color-emoji
       liberation_ttf
     ];
@@ -215,10 +219,23 @@
     fontconfig = {
       enable = true;
       defaultFonts = {
-        monospace = [ "RobotoMono Nerd Font" "Noto Color Emoji" ];
-        sansSerif = [ "Inter" "Noto Color Emoji" ];
-        serif     = [ "Liberation Serif" ];
-        emoji     = [ "Noto Color Emoji" ];
+			  	sansSerif = [ 
+          "Inter" 
+          "Liberation Sans" 
+          "Noto Sans CJK JP" 
+          "Noto Color Emoji" 
+        ];
+        serif = [ 
+          "Liberation Serif" 
+          "Noto Serif CJK JP" 
+          "Noto Color Emoji" 
+        ];
+        monospace = [ 
+          "RobotoMono Nerd Font" 
+          "Noto Sans Mono CJK JP" 
+          "Noto Color Emoji" 
+        ];
+        emoji = [ "Noto Color Emoji" ];
       };
 			hinting = {
 				enable = true;
