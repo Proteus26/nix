@@ -94,12 +94,9 @@
   environment.systemPackages = with pkgs; [
 		# Compilers and languages and such
     gcc
-		go
 		python3
 		nodejs
-		pnpm
 		gnumake
-		cmake
 
 		# Dev tools
     git
@@ -111,8 +108,9 @@
 		man
 		man-pages
 		man-pages-posix
-		gtest
 		openssl
+		nil
+		lua-language-server
 
 		# CLI tools
 		wget
@@ -126,7 +124,6 @@
 		wireguard-tools
     jq
     playerctl
-		direnv
 
 		# WM / Desktop related
 		hyprpaper
@@ -186,6 +183,11 @@
     remotePlay.openFirewall = true;
     dedicatedServer.openFirewall = true;
     localNetworkGameTransfers.openFirewall = true;
+  };
+
+	programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
   };
 
   programs.appimage = {
@@ -337,6 +339,8 @@
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
+
+	nix.settings.auto-optimise-store = true;
 
   system.stateVersion = "26.05";
 }
