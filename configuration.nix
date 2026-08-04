@@ -1,18 +1,23 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   # Boot params
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  boot.kernelParams = [ "nvidia-drm.modeset=1" ];
+  boot.kernelParams = [
+    "nvidia-drm.modeset=1"
+    "nvidia_drm.fbdev=1"
+  ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
@@ -38,15 +43,15 @@
     variant = "";
   };
 
-	# Env variables
-	environment.sessionVariables = {
+  # Env variables
+  environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     XDG_SESSION_TYPE = "wayland";
     AQ_DRM_DEVICES = "/dev/dri/intel-igpu:/dev/dri/nvidia-dgpu";
-		FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
+    FREETYPE_PROPERTIES = "cff:no-stem-darkening=0 autofitter:no-stem-darkening=0";
   };
 
-	# Graphics card bs
+  # Graphics card bs
   services.udev.extraRules = ''
     KERNEL=="card*", KERNELS=="0000:00:02.0", SUBSYSTEM=="drm", SUBSYSTEMS=="pci", SYMLINK+="dri/intel-igpu"
     KERNEL=="card*", KERNELS=="0000:01:00.0", SUBSYSTEM=="drm", SUBSYSTEMS=="pci", SYMLINK+="dri/nvidia-dgpu"
@@ -81,55 +86,61 @@
     };
   };
 
-	# Userslop
+  # Userslop
   users.users."proteus" = {
     isNormalUser = true;
     description = "proteus";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
-		shell = pkgs.zsh;
-    packages = with pkgs; [];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+    ];
+    shell = pkgs.zsh;
+    packages = with pkgs; [ ];
   };
 
   nixpkgs.config.allowUnfree = true;
   environment.systemPackages = with pkgs; [
-		# Compilers and languages and such
+    # Compilers and languages and such
     gcc
-		python3
-		nodejs
-		gnumake
+    python3
+    nodejs
+    gnumake
 
-		# Dev tools
+    # Dev tools
     git
-		docker-compose
+    docker-compose
     docker-buildx
     tree-sitter
-		neovim
-		tmux
-		man
-		man-pages
-		man-pages-posix
-		openssl
-		nil
-		lua-language-server
+    neovim
+    tmux
+    man
+    man-pages
+    man-pages-posix
+    openssl
+    opencode
+    nil
+    lua-language-server
 
-		# CLI tools
-		wget
-		unzip
-		fzf
-		zoxide
-		eza
-		ripgrep
-		btop
-		glib
-		wireguard-tools
+    # CLI tools
+    wget
+    unzip
+    fzf
+    zoxide
+    eza
+    ripgrep
+    btop
+    glib
+    wireguard-tools
     jq
     playerctl
+    udisks2
 
-		# WM / Desktop related
-		hyprpaper
-		hyprlock
-		hyprshot
-		quickshell
+    # WM / Desktop related
+    hyprpaper
+    hyprlock
+    hyprshot
+    quickshell
     wl-clipboard
     cliphist
     libnotify
@@ -140,22 +151,23 @@
     kdePackages.qtstyleplugin-kvantum
     dconf
 
-		#Apps
+    #Apps
     zsh
     kitty
     firefox
     vesktop
     yazi
     nautilus
+    gvfs
     file-roller
     qbittorrent
     mpv
-		ghidra
-		onlyoffice-desktopeditors
-		stremio-linux-shell
+    ghidra
+    onlyoffice-desktopeditors
+    stremio-linux-shell
   ];
 
-	# Hyprland initialization
+  # Hyprland initialization
   programs.hyprland = {
     enable = true;
     xwayland.enable = true;
@@ -168,16 +180,22 @@
     ];
     config = {
       common = {
-        default = [ "hyprland" "gtk" ];
+        default = [
+          "hyprland"
+          "gtk"
+        ];
       };
       hyprland = {
-        default = [ "hyprland" "gtk" ];
+        default = [
+          "hyprland"
+          "gtk"
+        ];
         "org.freedesktop.impl.portal.Settings" = [ "gtk" ];
       };
     };
   };
 
-	# Program Enabling
+  # Program Enabling
   programs.steam = {
     enable = true;
     remotePlay.openFirewall = true;
@@ -185,7 +203,7 @@
     localNetworkGameTransfers.openFirewall = true;
   };
 
-	programs.direnv = {
+  programs.direnv = {
     enable = true;
     nix-direnv.enable = true;
   };
@@ -197,14 +215,14 @@
 
   programs.dconf.enable = true;
 
-	programs.zsh.enable = true;
+  programs.zsh.enable = true;
 
-	# For some poop
+  # For some poop
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
   ];
 
-	# Fontslop
+  # Fontslop
   fonts = {
     packages = with pkgs; [
       inter
@@ -213,37 +231,37 @@
       nerd-fonts.symbols-only
       noto-fonts
       noto-fonts-cjk-sans
-			noto-fonts-cjk-serif
+      noto-fonts-cjk-serif
       noto-fonts-color-emoji
       liberation_ttf
     ];
-   
+
     fontconfig = {
       enable = true;
       defaultFonts = {
-			  	sansSerif = [ 
-          "Inter" 
-          "Liberation Sans" 
-          "Noto Sans CJK JP" 
-          "Noto Color Emoji" 
+        sansSerif = [
+          "Inter"
+          "Liberation Sans"
+          "Noto Sans CJK JP"
+          "Noto Color Emoji"
         ];
-        serif = [ 
-          "Liberation Serif" 
-          "Noto Serif CJK JP" 
-          "Noto Color Emoji" 
+        serif = [
+          "Liberation Serif"
+          "Noto Serif CJK JP"
+          "Noto Color Emoji"
         ];
-        monospace = [ 
-          "RobotoMono Nerd Font" 
-          "Noto Sans Mono CJK JP" 
-          "Noto Color Emoji" 
+        monospace = [
+          "RobotoMono Nerd Font"
+          "Noto Sans Mono CJK JP"
+          "Noto Color Emoji"
         ];
         emoji = [ "Noto Color Emoji" ];
       };
-			hinting = {
-				enable = true;
-				style = "slight";
-			};
-			antialias = true;
+      hinting = {
+        enable = true;
+        style = "slight";
+      };
+      antialias = true;
     };
   };
 
@@ -255,7 +273,7 @@
   #   enableSSHSupport = true;
   # };
 
-  # Services 
+  # Services
   services.openssh.enable = true;
 
   services.pipewire = {
@@ -275,7 +293,7 @@
     };
   };
 
-	hardware.bluetooth = {
+  hardware.bluetooth = {
     enable = true;
     powerOnBoot = true;
   };
@@ -284,11 +302,15 @@
   '';
   services.blueman.enable = true;
 
-	services.printing.enable = true;
+  services.printing.enable = true;
 
-	security.rtkit.enable = true;
+  security.rtkit.enable = true;
 
-	#Networking
+  services.udisks2.enable = true;
+
+  services.gvfs.enable = true;
+
+  #Networking
   networking.extraHosts = ''
     172.16.91.124  hpc01.sharanga.local hpc01
     172.16.91.125  hpc02.sharanga.local hpc02
@@ -296,7 +318,7 @@
 
   networking.hostName = "nix";
 
-	networking.networkmanager.enable = true;
+  networking.networkmanager.enable = true;
 
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
@@ -306,7 +328,7 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-	# Virtualisation
+  # Virtualisation
   virtualisation.docker = {
     enable = true;
     enableOnBoot = true;
@@ -327,11 +349,14 @@
     };
   };
 
-	# Filesystem related things
+  # Filesystem related things
   fileSystems."/mnt/ssdihh" = {
-  device = "/dev/disk/by-uuid/7548a1ed-3d14-4e48-b512-baa41300e8ec";
-  fsType = "ext4";
-  options = [ "defaults" "nofail" ];
+    device = "/dev/disk/by-uuid/7548a1ed-3d14-4e48-b512-baa41300e8ec";
+    fsType = "ext4";
+    options = [
+      "defaults"
+      "nofail"
+    ];
   };
 
   nix.gc = {
@@ -340,7 +365,7 @@
     options = "--delete-older-than 7d";
   };
 
-	nix.settings.auto-optimise-store = true;
+  nix.settings.auto-optimise-store = true;
 
   system.stateVersion = "26.05";
 }

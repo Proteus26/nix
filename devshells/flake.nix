@@ -6,11 +6,17 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
-        pkgs = import nixpkgs { 
-          inherit system; 
+        pkgs = import nixpkgs {
+          inherit system;
           config = {
             allowUnfree = true;
             cudaSupport = true;
@@ -22,11 +28,11 @@
           # C/C++
           cpp = pkgs.mkShell {
             nativeBuildInputs = [
-							pkgs.gnumake
+              pkgs.gnumake
               pkgs.cmake
               pkgs.ninja
               pkgs.pkg-config
-							pkgs.clang-tools
+              pkgs.clang-tools
             ];
             buildInputs = [
               pkgs.gtest
@@ -44,7 +50,7 @@
           cuda = pkgs.mkShell {
             nativeBuildInputs = [
               pkgs.cmake
-							pkgs.clang-tools
+              pkgs.clang-tools
             ];
             buildInputs = [
               pkgs.cudaPackages.cudatoolkit
@@ -61,13 +67,15 @@
             '';
           };
 
-					# Webslop
-					web = pkgs.mkShell {
+          # Webslop
+          web = pkgs.mkShell {
             nativeBuildInputs = [
-							pkgs.nodejs
-							pkgs.pnpm
+              pkgs.nodejs_24
+              pkgs.pnpm
+              pkgs.typescript
+              pkgs.typescript-language-server
+              pkgs.pkg-config
             ];
-
             shellHook = ''
               if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
                 export IN_NIX_SHELL_ZSH=1
@@ -76,8 +84,8 @@
             '';
           };
 
-					# Go
-					go = pkgs.mkShell {
+          # Go
+          go = pkgs.mkShell {
             nativeBuildInputs = [
               pkgs.go
               pkgs.gopls
@@ -91,32 +99,32 @@
                 exec ${pkgs.zsh}/bin/zsh
               fi
             '';
-          };	
+          };
 
-					# Python
+          # Python
           python = pkgs.mkShell {
             nativeBuildInputs = [
-							pkgs.python3
+              pkgs.python3
               pkgs.pyright
               pkgs.ruff
             ];
 
             shellHook = ''
-							if [ ! -d ".venv" ]; then
-                echo "Creating virtual environment..."
-                ${pkgs.python3}/bin/python -m venv .venv
-              fi
+              							if [ ! -d ".venv" ]; then
+                              echo "Creating virtual environment..."
+                              ${pkgs.python3}/bin/python -m venv .venv
+                            fi
 
-              source .venv/bin/activate
+                            source .venv/bin/activate
 
-              if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
-                export IN_NIX_SHELL_ZSH=1
-                exec ${pkgs.zsh}/bin/zsh
-              fi
+                            if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
+                              export IN_NIX_SHELL_ZSH=1
+                              exec ${pkgs.zsh}/bin/zsh
+                            fi
             '';
           };
 
-					# Rust
+          # Rust
           rust = pkgs.mkShell {
             nativeBuildInputs = [
               pkgs.cargo
@@ -136,6 +144,26 @@
             '';
           };
 
+          # Chrono
+          chrono = pkgs.mkShell {
+            nativeBuildInputs = [
+              pkgs.nodejs_24
+              pkgs.pnpm
+              pkgs.typescript
+              pkgs.typescript-language-server
+              pkgs.pkg-config
+              pkgs.biome
+              pkgs.postgresql
+            ];
+            shellHook = ''
+              if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
+                export IN_NIX_SHELL_ZSH=1
+                exec ${pkgs.zsh}/bin/zsh
+              fi
+            '';
+          };
+
         };
-      });
+      }
+    );
 }
