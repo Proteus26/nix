@@ -163,6 +163,23 @@
             '';
           };
 
+          # Java
+          java = pkgs.mkShell {
+            nativeBuildInputs = [
+              pkgs.jdk
+              pkgs.maven
+              pkgs.gradle
+              pkgs.jdt-language-server
+            ];
+
+            shellHook = ''
+              if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
+                export IN_NIX_SHELL_ZSH=1
+                exec ${pkgs.zsh}/bin/zsh
+              fi
+            '';
+          };
+
         };
       }
     );
