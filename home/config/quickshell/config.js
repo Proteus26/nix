@@ -27,65 +27,12 @@ const colors = {
   crust: "#11111b",
 }
 
-// Material Design 3 tonal color roles mapped onto the Catppuccin palette.
-const mat = {
-  primary: "#cba6f7",
-  onPrimary: "#1e1e2e",
-  primaryContainer: "#3e3655",
-  onPrimaryContainer: "#eadcf8",
-  secondary: "#89b4fa",
-  onSecondary: "#1e1e2e",
-  secondaryContainer: "#333c57",
-  onSecondaryContainer: "#d3e1fb",
-  tertiary: "#94e2d5",
-  onTertiary: "#1e1e2e",
-  tertiaryContainer: "#22433d",
-  onTertiaryContainer: "#c9f2e9",
-  error: "#f38ba8",
-  onError: "#1e1e2e",
-  errorContainer: "#4a2330",
-  onErrorContainer: "#ffdae2",
-  surface: "#1e1e2e",
-  surfaceContainerLowest: "#14141f",
-  surfaceContainerLow: "#222235",
-  surfaceContainer: "#262638",
-  surfaceContainerHigh: "#2b2b40",
-  surfaceContainerHighest: "#313148",
-  onSurface: "#cdd6f4",
-  onSurfaceVariant: "#a6adc8",
-  outline: "#6c7086",
-  outlineVariant: "#3a3a52",
-  // QML colors use #AARRGGBB (alpha first)
-  stateHover: "#14cba6f7",
-  statePressed: "#29cba6f7",
-  stateFocus: "#1fcba6f7",
-  stateSelected: "#29cba6f7",
-  onSurfaceHover: "#14cdd6f4",
-  onSurfacePressed: "#1ccdd6f4",
-  radius: {
-    sm: 8,
-    md: 12,
-    lg: 16,
-    xl: 20,
-    pill: 1000,
-  },
-  elevation: {
-    none: 0,
-    low: 1,
-    medium: 3,
-    high: 5,
-  },
-}
-
 const bar = {
-  fontFamily: "Roboto Mono Nerd Font",
-  fontSize: 13,
-  height: 36,
-  radius: 18,
-  chipHeight: 26,
-  iconSize: 15,
+	fontFamily: "Roboto Mono Nerd Font",
+	fontSize: 14,
+	height: 30
 }
 
 const notifications = {
-  timeout: 5000,
+	timeout: 5000,
 }

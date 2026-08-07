@@ -4,9 +4,9 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 
 import "config.js" as Config
-import "components"
 
 Scope {
 	id: root
@@ -168,10 +168,10 @@ Scope {
 			root.thumbWorkerRunning = false
 			return
 		}
-
+		
 		root.thumbWorkerRunning = true
 		const task = root.pendingQueue.shift()
-
+		
 		thumbWorker.currentId = task.id
 		thumbWorker.currentPath = task.path
 		thumbWorker.command = ["sh", "-c", "printf '%s\\n' \"$1\" | cliphist decode > \"$2\"", "--", task.rawLine, task.path]
@@ -182,12 +182,12 @@ Scope {
 		id: thumbWorker
 		property string currentId: ""
 		property string currentPath: ""
-
+		
 		onExited: (code, status) => {
 			const updated = Object.assign({}, root.thumbCache)
 			updated[thumbWorker.currentId] = (code === 0) ? thumbWorker.currentPath : "error"
 			root.thumbCache = updated
-
+			
 			root.processNextThumbnail()
 		}
 	}
@@ -233,23 +233,24 @@ Scope {
 
 			onVisibleChanged: {
 				if (visible) {
-					searchField.text = ""
+					searchInput.text = ""
 					root.applyFilter("")
 					root.refreshHistory()
-					searchField.input.forceActiveFocus()
+					searchInput.forceActiveFocus()
 				}
 			}
 
-			MCard {
+			Rectangle {
 				anchors.fill: parent
-				radius: Config.mat.radius.xl
-				color: Config.mat.surfaceContainerLowest
-				elevation: Config.mat.elevation.high
+				radius: 10
+				color: Config.colors.base
+				border.width: 2
+				border.color: Config.colors.mauve
 
 				ColumnLayout {
 					anchors.fill: parent
 					anchors.margins: 16
-					spacing: 14
+					spacing: 12
 
 					RowLayout {
 						Layout.fillWidth: true
@@ -257,41 +258,88 @@ Scope {
 						Text {
 							Layout.fillWidth: true
 							text: "Clipboard History"
-							color: Config.mat.onSurface
+							color: Config.colors.sky
 							font.family: Config.bar.fontFamily
-							font.pixelSize: Config.bar.fontSize + 2
+							font.pixelSize: Config.bar.fontSize + 1
 							font.bold: true
 						}
 
 						Text {
 							visible: root.searchResults.length > 0
 							text: root.searchResults.length + " item" + (root.searchResults.length === 1 ? "" : "s")
-							color: Config.mat.onSurfaceVariant
+							color: Config.colors.subtext0
 							font.family: Config.bar.fontFamily
 							font.pixelSize: Config.bar.fontSize - 3
 						}
 					}
 
-					MField {
-						id: searchField
+					Rectangle {
 						Layout.fillWidth: true
-						icon: "\uf002"
-						placeholder: "Search clipboard history..."
-						onSubmit: root.activateCurrent()
-						onClose: root.clipOpen = false
-						onInputChanged: root.applyFilter(searchField.text)
-						onDeleteRequested: {
-							if (root.currentIndex >= 0 && root.currentIndex < root.searchResults.length)
-								root.deleteEntry(root.searchResults[root.currentIndex])
-						}
+						Layout.preferredHeight: 45
+						radius: 8
+						color: Config.colors.mantle
+						border.width: 1
+						border.color: searchInput.activeFocus ? Config.colors.sky : Config.colors.overlay2
 
-						onNavigateDown: {
-							if (root.searchResults.length > 0)
-								root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
-						}
-						onNavigateUp: {
-							if (root.searchResults.length > 0)
-								root.currentIndex = (root.currentIndex - 1 + root.searchResults.length) % root.searchResults.length
+						RowLayout {
+							anchors.fill: parent
+							anchors.margins: 12
+							spacing: 8
+
+							Text {
+								text: ""
+								color: Config.colors.subtext0
+								font.family: Config.bar.fontFamily
+								font.pixelSize: Config.bar.fontSize + 2
+							}
+
+							Item {
+								Layout.fillWidth: true
+								Layout.fillHeight: true
+
+								Text {
+									anchors.verticalCenter: parent.verticalCenter
+									visible: searchInput.text.length === 0
+									text: "Search clipboard history..."
+									color: Config.colors.subtext0
+									font.family: Config.bar.fontFamily
+									font.pixelSize: Config.bar.fontSize
+									elide: Text.ElideRight
+									width: parent.width
+								}
+
+								TextInput {
+									id: searchInput
+									anchors.fill: parent
+									verticalAlignment: TextInput.AlignVCenter
+									color: Config.colors.text
+									font.family: Config.bar.fontFamily
+									font.pixelSize: Config.bar.fontSize + 2
+									clip: true
+
+									onTextChanged: root.applyFilter(text)
+									onAccepted: root.activateCurrent()
+
+									Keys.onEscapePressed: root.clipOpen = false
+
+									Keys.onDownPressed: {
+										if (root.searchResults.length > 0)
+											root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
+									}
+									Keys.onUpPressed: {
+										if (root.searchResults.length > 0)
+											root.currentIndex = (root.currentIndex - 1 + root.searchResults.length) % root.searchResults.length
+									}
+									Keys.onTabPressed: {
+										if (root.searchResults.length > 0)
+											root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
+									}
+									Keys.onDeletePressed: {
+										if (root.currentIndex >= 0 && root.currentIndex < root.searchResults.length)
+											root.deleteEntry(root.searchResults[root.currentIndex])
+									}
+								}
+							}
 						}
 					}
 
@@ -303,21 +351,27 @@ Scope {
 						model: root.searchResults
 						currentIndex: root.currentIndex
 						clip: true
-						spacing: 6
+						spacing: 4
 						boundsBehavior: Flickable.StopAtBounds
 						highlightMoveDuration: 100
 
 						onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
 
-						delegate: MItem {
+						delegate: Rectangle {
 							id: delegateRoot
 							width: ListView.view.width
-							height: modelData.isImage ? 170 : 60
-							radius: Config.mat.radius.md
-							selected: ListView.isCurrentItem
+							height: modelData.isImage ? 160 : 56 
+							radius: 8
 
 							required property var modelData
 							required property int index
+
+							property bool isCurrent: ListView.isCurrentItem
+							color: isCurrent
+								? Config.colors.surface0
+								: (mouseArea.containsMouse ? Config.colors.surface0 : "transparent")
+							border.width: isCurrent ? 1 : 0
+							border.color: Config.colors.sky
 
 							Component.onCompleted: {
 								if (modelData.isImage) root.ensureThumbnail(modelData.id, modelData.rawLine)
@@ -325,7 +379,7 @@ Scope {
 
 							ColumnLayout {
 								anchors.fill: parent
-								anchors.margins: 12
+								anchors.margins: 10
 								spacing: 8
 
 								RowLayout {
@@ -333,17 +387,14 @@ Scope {
 									Layout.preferredHeight: 36
 									spacing: 12
 
-									Rectangle {
+									Item {
 										Layout.preferredWidth: 36
 										Layout.preferredHeight: 36
-										radius: 10
-										color: Config.mat.surfaceContainerHighest
 
 										Text {
 											anchors.centerIn: parent
-											text: modelData.isImage ? "\uf03e" : "\uf0c5"
-											color: Config.mat.onSurfaceVariant
-											font.family: Config.bar.fontFamily
+											text: "󰅍"
+											color: Config.colors.subtext0
 											font.pixelSize: Config.bar.fontSize + 4
 										}
 									}
@@ -355,7 +406,7 @@ Scope {
 										Text {
 											Layout.fillWidth: true
 											text: modelData.isImage ? "Image" : modelData.preview
-											color: Config.mat.onSurface
+											color: Config.colors.text
 											font.family: Config.bar.fontFamily
 											font.pixelSize: Config.bar.fontSize
 											elide: Text.ElideRight
@@ -365,20 +416,31 @@ Scope {
 										Text {
 											visible: modelData.isImage && modelData.size !== ""
 											text: modelData.size
-											color: Config.mat.onSurfaceVariant
+											color: Config.colors.subtext0
 											font.family: Config.bar.fontFamily
 											font.pixelSize: Config.bar.fontSize - 3
 										}
 									}
 
-									MButton {
-										id: delBtn
-										icon: "\uf1f8"
-										size: 30
-										radius: 15
-										iconPixelSize: Config.bar.fontSize - 1
-										fgColor: Config.mat.onSurfaceVariant
-										onClicked: root.deleteEntry(modelData)
+									Rectangle {
+										Layout.preferredWidth: 28
+										Layout.preferredHeight: 28
+										radius: 6
+										color: delBtn.containsMouse ? Config.colors.red : "transparent"
+
+										Text {
+											anchors.centerIn: parent
+											text: "󰆴"
+											color: delBtn.containsMouse ? Config.colors.base : Config.colors.subtext0
+											font.pixelSize: Config.bar.fontSize
+										}
+
+										MouseArea {
+											id: delBtn
+											anchors.fill: parent
+											hoverEnabled: true
+											onClicked: root.deleteEntry(modelData)
+										}
 									}
 								}
 
@@ -399,30 +461,33 @@ Scope {
 									Text {
 										visible: modelData.isImage && (root.thumbCache[modelData.id] === "pending" || root.thumbCache[modelData.id] === undefined)
 										anchors.centerIn: parent
-										text: "\uf110"
-										color: Config.mat.onSurfaceVariant
-										font.family: Config.bar.fontFamily
-										font.pixelSize: Config.bar.fontSize + 6
+										text: "󰔟"
+										color: Config.colors.subtext0
+										font.pixelSize: Config.bar.fontSize + 4
 									}
 
 									Text {
 										visible: modelData.isImage && root.thumbCache[modelData.id] === "error"
 										anchors.centerIn: parent
-										text: "\uf071"
-										color: Config.mat.error
+										text: "󰅖"
+										color: Config.colors.red
 										font.bold: true
-										font.family: Config.bar.fontFamily
 										font.pixelSize: Config.bar.fontSize + 4
 									}
 								}
 							}
 
-							onClicked: {
-								root.currentIndex = delegateRoot.index
-								root.activateCurrent()
-							}
-							onHoveredChanged: {
-								if (delegateRoot.hovered) root.currentIndex = delegateRoot.index
+							MouseArea {
+								id: mouseArea
+								anchors.fill: parent
+								hoverEnabled: true
+								z: -1 
+								onEntered: root.currentIndex = delegateRoot.index
+
+								onClicked: {
+									root.currentIndex = delegateRoot.index
+									root.activateCurrent()
+								}
 							}
 						}
 					}
@@ -437,7 +502,7 @@ Scope {
 							text: root.allEntries.length === 0
 								? "No clipboard history yet"
 								: "No matching entries"
-							color: Config.mat.onSurfaceVariant
+							color: Config.colors.subtext0
 							font.family: Config.bar.fontFamily
 							font.pixelSize: Config.bar.fontSize - 1
 							horizontalAlignment: Text.AlignHCenter

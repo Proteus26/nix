@@ -8,6 +8,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nh = {
+      url = "github:viperML/nh";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -15,6 +20,7 @@
       self,
       nixpkgs,
       home-manager,
+      nh,
       ...
     }@inputs:
     let
@@ -37,6 +43,7 @@
       homeConfigurations."proteus@nix" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [ ./home ];
+        extraSpecialArgs = { inherit inputs; };
       };
     };
 }
