@@ -1,16 +1,21 @@
-{ ... }:
+{ config, ... }:
 
+let
+  dotfilesDir = "/home/proteus/nix";
+
+  link = name: config.lib.file.mkOutOfStoreSymlink "${dotfilesDir}/home/config/${name}";
+in
 {
   xdg.configFile = {
-    "hypr" = { source = ./config/hypr; recursive = true; };
-    "kitty" = { source = ./config/kitty; recursive = true; };
-    "mpv" = { source = ./config/mpv; recursive = true; };
-    "btop" = { source = ./config/btop; recursive = true; };
-    "quickshell" = { source = ./config/quickshell; recursive = true; };
-    "nwg-look" = { source = ./config/nwg-look; recursive = true; };
-    "qt5ct" = { source = ./config/qt5ct; recursive = true; };
-    "qt6ct" = { source = ./config/qt6ct; recursive = true; };
-    "Kvantum" = { source = ./config/Kvantum; recursive = true; };
-    "gtk-3.0" = { source = ./config/gtk-3.0; recursive = true; };
+    "hypr".source = link "hypr";
+    "kitty".source = link "kitty";
+    "mpv".source = link "mpv";
+    "btop".source = link "btop";
+    "quickshell".source = link "quickshell";
+    "nwg-look".source = link "nwg-look";
+    "qt5ct".source = link "qt5ct";
+    "qt6ct".source = link "qt6ct";
+    "Kvantum".source = link "Kvantum";
+    "gtk-3.0".source = link "gtk-3.0";
   };
 }

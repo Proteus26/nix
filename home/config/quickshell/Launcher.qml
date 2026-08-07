@@ -4,9 +4,9 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 
 import "config.js" as Config
+import "components"
 
 Scope {
 	id: root
@@ -164,8 +164,8 @@ Scope {
 			readonly property bool isFocusedMonitor: monitor?.name === Hyprland.focusedMonitor?.name
 
 			visible: root.launcherOpen && isFocusedMonitor
-			implicitWidth: 450
-			implicitHeight: 500
+			implicitWidth: 460
+			implicitHeight: 520
 			color: "transparent"
 			exclusionMode: ExclusionMode.Ignore
 
@@ -173,23 +173,22 @@ Scope {
 
 			onVisibleChanged: {
 				if (visible) {
-					searchInput.text = ""
+					searchField.text = ""
 					root.updateModel("")
-					searchInput.forceActiveFocus()
+					searchField.input.forceActiveFocus()
 				}
 			}
 
-			Rectangle {
+			MCard {
 				anchors.fill: parent
-				radius: 10
-				color: Config.colors.base
-				border.width: 2
-				border.color: Config.colors.mauve
+				radius: Config.mat.radius.xl
+				color: Config.mat.surfaceContainerLowest
+				elevation: Config.mat.elevation.high
 
 				ColumnLayout {
 					anchors.fill: parent
 					anchors.margins: 16
-					spacing: 12
+					spacing: 14
 
 					RowLayout {
 						Layout.fillWidth: true
@@ -197,86 +196,39 @@ Scope {
 						Text {
 							Layout.fillWidth: true
 							text: "Applications"
-							color: Config.colors.sky
+							color: Config.mat.onSurface
 							font.family: Config.bar.fontFamily
-							font.pixelSize: Config.bar.fontSize + 1
+							font.pixelSize: Config.bar.fontSize + 2
 							font.bold: true
 						}
 
 						Text {
-							visible: root.searchResults.length > 0 && !searchInput.text.startsWith("=")
+							visible: root.searchResults.length > 0 && !searchField.text.startsWith("=")
 							text: root.searchResults.length + " result" + (root.searchResults.length === 1 ? "" : "s")
-							color: Config.colors.subtext0
+							color: Config.mat.onSurfaceVariant
 							font.family: Config.bar.fontFamily
 							font.pixelSize: Config.bar.fontSize - 3
 						}
 					}
 
-					Rectangle {
+					MField {
+						id: searchField
 						Layout.fillWidth: true
-						Layout.preferredHeight: 45
-						radius: 8
-						color: Config.colors.mantle
-						border.width: 1
-						border.color: searchInput.activeFocus ? Config.colors.sky : Config.colors.overlay2
+						icon: searchField.text.startsWith("=") ? "\uf1ec" : "\uf002"
+						iconColor: searchField.text.startsWith("=") ? Config.mat.primary : Config.mat.onSurfaceVariant
+						placeholder: "Type to search, or start with = to calculate..."
 
-						RowLayout {
-							anchors.fill: parent
-							anchors.margins: 12
-							spacing: 8
+						onSubmit: root.activateCurrent()
+						onClose: root.launcherOpen = false
+						onInputChanged: root.updateModel(searchField.text)
 
-							Text {
-								text: searchInput.text.startsWith("=") ? "󰃬" : "󰍉"
-								color: searchInput.text.startsWith("=") ? Config.colors.sky : Config.colors.subtext0
-								font.family: Config.bar.fontFamily
-								font.pixelSize: Config.bar.fontSize + 2
-							}
-
-							Item {
-								Layout.fillWidth: true
-								Layout.fillHeight: true
-
-								Text {
-									anchors.verticalCenter: parent.verticalCenter
-									visible: searchInput.text.length === 0
-									text: "Type to search, or start with = to calculate…"
-									color: Config.colors.subtext0
-									font.family: Config.bar.fontFamily
-									font.pixelSize: Config.bar.fontSize
-									elide: Text.ElideRight
-									width: parent.width
-								}
-
-								TextInput {
-									id: searchInput
-									anchors.fill: parent
-									verticalAlignment: TextInput.AlignVCenter
-									color: Config.colors.text
-									font.family: Config.bar.fontFamily
-									font.pixelSize: Config.bar.fontSize + 2
-									clip: true
-
-									onTextChanged: root.updateModel(text)
-
-									// Links to the bulletproof master function
-									onAccepted: root.activateCurrent()
-
-									Keys.onEscapePressed: root.launcherOpen = false
-
-									Keys.onDownPressed: {
-										if (root.searchResults.length > 0)
-											root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
-									}
-									Keys.onUpPressed: {
-										if (root.searchResults.length > 0)
-											root.currentIndex = (root.currentIndex - 1 + root.searchResults.length) % root.searchResults.length
-									}
-									Keys.onTabPressed: {
-										if (root.searchResults.length > 0)
-											root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
-									}
-								}
-							}
+						onNavigateDown: {
+							if (root.searchResults.length > 0)
+								root.currentIndex = (root.currentIndex + 1) % root.searchResults.length
+						}
+						onNavigateUp: {
+							if (root.searchResults.length > 0)
+								root.currentIndex = (root.currentIndex - 1 + root.searchResults.length) % root.searchResults.length
 						}
 					}
 
@@ -294,21 +246,15 @@ Scope {
 
 						onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
 
-						delegate: Rectangle {
+						delegate: MItem {
 							id: delegateRoot
 							width: ListView.view.width
-							height: 50
-							radius: 8
+							height: 52
+							radius: Config.mat.radius.md
+							selected: ListView.isCurrentItem
 
 							required property var modelData
 							required property int index
-
-							property bool isCurrent: ListView.isCurrentItem
-							color: isCurrent
-								? Config.colors.surface0
-								: (mouseArea.containsMouse ? Config.colors.surface0 : "transparent")
-							border.width: isCurrent ? 1 : 0
-							border.color: Config.colors.sky
 
 							RowLayout {
 								anchors.fill: parent
@@ -316,8 +262,8 @@ Scope {
 								spacing: 16
 
 								Image {
-									Layout.preferredWidth: 32
-									Layout.preferredHeight: 32
+									Layout.preferredWidth: 34
+									Layout.preferredHeight: 34
 									visible: !modelData.isCalc && source.toString() !== ""
 									source: modelData.isCalc ? "" : (Quickshell.iconPath(modelData.appIcon, true) || "")
 									fillMode: Image.PreserveAspectFit
@@ -325,18 +271,19 @@ Scope {
 
 								Text {
 									visible: modelData.isCalc
-									Layout.preferredWidth: 32
+									Layout.preferredWidth: 34
 									text: "="
 									horizontalAlignment: Text.AlignHCenter
-									color: Config.colors.sky
+									color: Config.mat.primary
 									font.bold: true
-									font.pixelSize: Config.bar.fontSize + 4
+									font.family: Config.bar.fontFamily
+									font.pixelSize: Config.bar.fontSize + 6
 								}
 
 								Text {
 									Layout.fillWidth: true
 									text: modelData.appName
-									color: modelData.isCalc ? Config.colors.sky : Config.colors.text
+									color: modelData.isCalc ? Config.mat.primary : Config.mat.onSurface
 									font.family: Config.bar.fontFamily
 									font.pixelSize: Config.bar.fontSize
 									font.bold: true
@@ -346,22 +293,18 @@ Scope {
 								Text {
 									visible: modelData.isCalc && modelData.calcResult !== ""
 									text: "copy"
-									color: Config.colors.subtext0
+									color: Config.mat.onSurfaceVariant
 									font.family: Config.bar.fontFamily
 									font.pixelSize: Config.bar.fontSize - 3
 								}
 							}
 
-							MouseArea {
-								id: mouseArea
-								anchors.fill: parent
-								hoverEnabled: true
-								onEntered: root.currentIndex = delegateRoot.index
-
-								onClicked: {
-									root.currentIndex = delegateRoot.index
-									root.activateCurrent()
-								}
+							onClicked: {
+								root.currentIndex = delegateRoot.index
+								root.activateCurrent()
+							}
+							onHoveredChanged: {
+								if (delegateRoot.hovered) root.currentIndex = delegateRoot.index
 							}
 						}
 					}
@@ -373,8 +316,8 @@ Scope {
 
 						Text {
 							anchors.centerIn: parent
-							text: searchInput.text.startsWith("=") ? "Enter a valid expression" : "No matching applications"
-							color: Config.colors.subtext0
+							text: searchField.text.startsWith("=") ? "Enter a valid expression" : "No matching applications"
+							color: Config.mat.onSurfaceVariant
 							font.family: Config.bar.fontFamily
 							font.pixelSize: Config.bar.fontSize - 1
 							horizontalAlignment: Text.AlignHCenter

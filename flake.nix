@@ -10,14 +10,33 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
-    nixosConfigurations."nix" = nixpkgs.lib.nixosSystem {
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+      ...
+    }@inputs:
+    let
       system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [
-        ./hosts/nix
-        home-manager.nixosModules.home-manager
-      ];
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
+    {
+      nixosConfigurations."nix" = nixpkgs.lib.nixosSystem {
+        inherit system;
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/nix
+          home-manager.nixosModules.home-manager
+        ];
+      };
+
+      homeConfigurations."proteus@nix" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [ ./home ];
+      };
     };
-  };
 }

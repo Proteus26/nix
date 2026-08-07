@@ -7,6 +7,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "config.js" as Config
+import "components"
 
 Scope {
 	id: root
@@ -69,7 +70,7 @@ Scope {
 
 				Repeater {
 					model: server.trackedNotifications
-					delegate: Rectangle {
+					delegate: MCard {
 						id: card
 						required property var modelData
 
@@ -80,17 +81,29 @@ Scope {
 						}
 
 						Layout.fillWidth: true
-						Layout.preferredHeight: layout.implicitHeight + 20
-						radius: 8
-						color: Config.colors.base
-						border.width: 2
-						border.color: modelData.urgency === NotificationUrgency.Critical ? Config.colors.red : Config.colors.mauve
+						Layout.preferredHeight: layout.implicitHeight
+						radius: Config.mat.radius.lg
+						elevation: Config.mat.elevation.medium
+						color: card.modelData.urgency === NotificationUrgency.Critical
+							? Config.mat.errorContainer
+							: Config.mat.surfaceContainer
+
+						Rectangle {
+							anchors { top: parent.top; bottom: parent.bottom; left: parent.left }
+							anchors.topMargin: 10
+							anchors.bottomMargin: 10
+							width: 3
+							radius: 1.5
+							color: card.modelData.urgency === NotificationUrgency.Critical
+								? Config.mat.error
+								: Config.mat.primary
+						}
 
 						RowLayout {
 							id: layout
 							anchors.fill: parent
-							anchors.margins: 10
-							spacing: 10
+							anchors.margins: 12
+							spacing: 12
 
 							Image {
 								Layout.preferredHeight: 36
@@ -108,7 +121,9 @@ Scope {
 								Text {
 									Layout.fillWidth: true
 									text: card.modelData.summary
-									color: Config.colors.sky
+									color: card.modelData.urgency === NotificationUrgency.Critical
+										? Config.mat.onErrorContainer
+										: Config.mat.onSurface
 									font.family: Config.bar.fontFamily
 									font.pixelSize: Config.bar.fontSize
 									font.bold: true
@@ -119,7 +134,9 @@ Scope {
 									Layout.fillWidth: true
 									visible: text !== ""
 									text: card.modelData.body
-									color: Config.colors.text
+									color: card.modelData.urgency === NotificationUrgency.Critical
+										? Config.mat.onErrorContainer
+										: Config.mat.onSurfaceVariant
 									font.family: Config.bar.fontFamily
 									font.pixelSize: Config.bar.fontSize - 1
 									wrapMode: Text.WordWrap
@@ -149,70 +166,63 @@ Scope {
 			readonly property bool isFocusedMonitor: monitor?.name === Hyprland.focusedMonitor?.name
 
 			visible: root.centerOpen && isFocusedMonitor
-			
+
 			anchors { top: true; right: true }
 			margins { top: 12; right: 12 }
 
 			implicitWidth: 380
-			implicitHeight: centerCol.implicitHeight + 24 
+			implicitHeight: centerCol.implicitHeight
 			color: "transparent"
 
 			exclusionMode: ExclusionMode.Normal
 
-			Rectangle {
+			MCard {
 				anchors.fill: parent
-				radius: 10
-				color: Config.colors.base
-				border.width: 2
-				border.color: Config.colors.mauve
+				radius: Config.mat.radius.xl
+				color: Config.mat.surfaceContainerLowest
+				elevation: Config.mat.elevation.high
 
 				ColumnLayout {
 					id: centerCol
 					anchors.fill: parent
-					anchors.margins: 12
+					anchors.margins: 16
 					spacing: 10
 
-					RowLayout{
+					RowLayout {
 						Layout.fillWidth: true
 
 						Text {
 							Layout.fillWidth: true
 							text: "Notifications"
-							color: Config.colors.sky
+							color: Config.mat.onSurface
 							font.family: Config.bar.fontFamily
-							font.pixelSize: Config.bar.fontSize + 1
+							font.pixelSize: Config.bar.fontSize + 2
 							font.bold: true
 						}
 
-						Text {
-							text: "Clear all"
+						MButton {
 							visible: history.count > 0
-							color: Config.colors.red
-							font.family: Config.bar.fontFamily
-							font.pixelSize: Config.bar.fontSize
-							font.bold: true
-							MouseArea {
-								anchors.fill: parent
-								onClicked: history.clear()
-							}
+							text: "Clear all"
+							textPixelSize: Config.bar.fontSize
+							fgColor: Config.mat.error
+							onClicked: history.clear()
 						}
 					}
 
 					Repeater {
 						model: history
-						delegate: Rectangle {
+						delegate: MItem {
 							Layout.fillWidth: true
-							Layout.preferredHeight: histLayout.implicitHeight + 20
-							radius: 8
-							color: Config.colors.mantle 
-							border.width: 1
-							border.color: urgency === NotificationUrgency.Critical ? Config.colors.red : Config.colors.overlay2
+							Layout.preferredHeight: histLayout.implicitHeight
+							radius: Config.mat.radius.md
+							normalColor: "transparent"
+							selected: false
 
 							RowLayout {
 								id: histLayout
 								anchors.fill: parent
-								anchors.margins: 10
-								spacing: 10
+								anchors.margins: 12
+								spacing: 12
 
 								ColumnLayout {
 									Layout.fillWidth: true
@@ -225,7 +235,9 @@ Scope {
 										Text {
 											Layout.fillWidth: true
 											text: summary
-											color: Config.colors.text
+											color: urgency === NotificationUrgency.Critical
+												? Config.mat.error
+												: Config.mat.onSurface
 											font.family: Config.bar.fontFamily
 											font.pixelSize: Config.bar.fontSize
 											font.bold: true
@@ -234,20 +246,9 @@ Scope {
 
 										Text {
 											text: model.time
-											color: Config.colors.subtext0
+											color: Config.mat.onSurfaceVariant
 											font.family: Config.bar.fontFamily
 											font.pixelSize: Config.bar.fontSize - 3
-										}
-
-										Text {
-											text: "󰅙"
-											color: Config.colors.subtext0
-											font.family: Config.bar.fontFamily
-											font.pixelSize: Config.bar.fontSize - 1
-											MouseArea {
-												anchors.fill: parent
-												onClicked: history.remove(index)
-											}
 										}
 									}
 
@@ -255,7 +256,7 @@ Scope {
 										Layout.fillWidth: true
 										visible: body !== ""
 										text: body
-										color: Config.colors.text
+										color: Config.mat.onSurfaceVariant
 										font.family: Config.bar.fontFamily
 										font.pixelSize: Config.bar.fontSize - 1
 										wrapMode: Text.WordWrap
@@ -264,10 +265,19 @@ Scope {
 									Text {
 										visible: model.appName !== ""
 										text: model.appName
-										color: Config.colors.subtext0
+										color: Config.mat.outline
 										font.family: Config.bar.fontFamily
 										font.pixelSize: Config.bar.fontSize - 3
 									}
+								}
+
+								MButton {
+									icon: "\uf00d"
+									size: 26
+									radius: 13
+									iconPixelSize: Config.bar.fontSize - 1
+									fgColor: Config.mat.onSurfaceVariant
+									onClicked: history.remove(index)
 								}
 							}
 						}

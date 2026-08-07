@@ -19,6 +19,7 @@
       defaultFonts = {
         sansSerif = [
           "Inter"
+          "rubik"
           "Liberation Sans"
           "Noto Sans CJK JP"
           "Noto Color Emoji"

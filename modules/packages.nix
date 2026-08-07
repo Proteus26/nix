@@ -1,7 +1,9 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
+    inputs.home-manager.packages.${pkgs.system}.default
+
     # Compilers and languages (build tools stay system-wide)
     gcc
     python3

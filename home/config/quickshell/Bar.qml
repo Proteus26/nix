@@ -2,33 +2,44 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Hyprland
+import Quickshell.Networking
+import Quickshell.Services.Mpris
+import Quickshell.Services.Pipewire
+import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
 
 import "config.js" as Config
+import "components"
 
 Scope {
 	id: root
 
-	//sysinfo properties
+	// system stats
 	property int cpuUsage: 0
 	property int memUsage: 0
 	property int diskUsage: 0
 	property int volumeLevel: 0
-	property string activeWindow: "Window"
-	property var lastCpuIdle: 0
-	property var lastCpuTotal: 0
-	property int batteryLevel: 100
-	property string batteryStatus: "Unknown"
+	property int batteryLevel: -1
+	property int batteryStatus: -1
 	property string wifiSSID: ""
 	property int wifiSignal: 0
 	property string networkType: "offline"
-	property string playerStatus: ""
-	property string playerArtist: ""
-	property string playerTitle: ""
+	property var lastCpuIdle: 0
+	property var lastCpuTotal: 0
+
+	// media (Mpris service)
+	property var mediaPlayer: null
+
+	// ---- services ----
+
+	readonly property var audioSink: Pipewire.defaultAudioSink
+	readonly property var batteryDevice: UPower.displayDevice
+
+	property string activeWindowTitle: Hyprland.activeToplevel?.title ?? ""
 
 	function batteryIcon() {
-		if (batteryStatus === "Charging") return "\uf0e7"
+		if (batteryStatus === UPowerDeviceState.Charging) return "\uf0e7"
 		if (batteryLevel >= 90) return "\uf240"
 		if (batteryLevel >= 60) return "\uf241"
 		if (batteryLevel >= 40) return "\uf242"
@@ -36,235 +47,209 @@ Scope {
 		return "\uf244"
 	}
 
-	function playerIcon() {
-		return playerStatus === "Playing" ? "\uf04c" : "\uf04b"
-	}
-
 	function wifiIcon() {
 		if (networkType === "ethernet") return "\udb80\ude00"
-		if (networkType !== "wifi" || wifiSSID === "" || wifiSSID === "Offline") return "\udb82\udd2d"
+		if (networkType !== "wifi" || wifiSSID === "") return "\udb82\udd2d"
 		if (wifiSignal >= 80) return "\udb82\udd28"
 		if (wifiSignal >= 55) return "\udb82\udd25"
 		if (wifiSignal >= 30) return "\udb82\udd22"
 		return "\udb82\udd1f"
 	}
 
-	function playerLabel() {
-		if (playerStatus === "") return "No media"
-		if (playerArtist && playerTitle) return playerArtist + " - " + playerTitle
-		return playerTitle || playerArtist || "No media"
+	// ---- cpu (reads /proc/stat through FileView, no subprocess) ----
+	FileView {
+		id: cpuFile
+		path: "/proc/stat"
+		blockAllReads: true
 	}
 
-	//cpu usage
-	Process {
-		id: cpuProc
-		command: ["sh", "-c", "head -1 /proc/stat"]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var parts = data.trim().split(/\s+/)
-				var user = parseInt(parts[1]) || 0
-				var nice = parseInt(parts[2]) || 0
-				var system = parseInt(parts[3]) || 0
-				var idle = parseInt(parts[4]) || 0
-				var iowait = parseInt(parts[5]) || 0
-				var irq = parseInt(parts[6]) || 0
-				var softirq = parseInt(parts[7]) || 0
+	function updateCpu() {
+		cpuFile.reload()
+		const data = cpuFile.text()
+		if (!data) return
+		const parts = data.trim().split(/\s+/)
+		const user = parseInt(parts[1]) || 0
+		const nice = parseInt(parts[2]) || 0
+		const system = parseInt(parts[3]) || 0
+		const idle = parseInt(parts[4]) || 0
+		const iowait = parseInt(parts[5]) || 0
+		const irq = parseInt(parts[6]) || 0
+		const softirq = parseInt(parts[7]) || 0
+		const total = user + nice + system + idle + iowait + irq + softirq
+		const idleTime = idle + iowait
 
-				var total = user + nice + system + idle + iowait + irq + softirq
-				var idleTime = idle + iowait
-
-				if (lastCpuTotal > 0) {
-					var totalDiff = total - lastCpuTotal
-					var idleDiff = idleTime - lastCpuIdle
-					if (totalDiff > 0) {
-						cpuUsage = Math.round(100 * (totalDiff - idleDiff) / totalDiff)
-					}
-				}
-				lastCpuTotal = total
-				lastCpuIdle = idleTime
+		if (root.lastCpuTotal > 0) {
+			const totalDiff = total - root.lastCpuTotal
+			const idleDiff = idleTime - root.lastCpuIdle
+			if (totalDiff > 0) {
+				root.cpuUsage = Math.round(100 * (totalDiff - idleDiff) / totalDiff)
 			}
 		}
-		Component.onCompleted: running = true
+		root.lastCpuTotal = total
+		root.lastCpuIdle = idleTime
 	}
 
-	//mem usage
-	Process {
-		id: memProc
-		command: ["sh", "-c", "free | grep Mem"]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var parts = data.trim().split(/\s+/)
-				var total = parseInt(parts[1]) || 1
-				var used = parseInt(parts[2]) || 0
-				memUsage = Math.round(100 * used / total)
-			}
+	// ---- memory (reads /proc/meminfo through FileView) ----
+	FileView {
+		id: memFile
+		path: "/proc/meminfo"
+		blockAllReads: true
+	}
+
+	function updateMem() {
+		memFile.reload()
+		const data = memFile.text()
+		if (!data) return
+		let total = 0
+		let available = 0
+		const lines = data.split("\n")
+		for (const line of lines) {
+			if (line.startsWith("MemTotal:")) total = parseInt(line.split(/\s+/)[1]) || 0
+			else if (line.startsWith("MemAvailable:")) available = parseInt(line.split(/\s+/)[1]) || 0
 		}
-		Component.onCompleted: running = true
+		if (total > 0) {
+			root.memUsage = Math.max(0, Math.min(100, Math.round(100 * (total - available) / total)))
+		}
 	}
 
-	//disk usage
+	// ---- disk (df) ----
 	Process {
 		id: diskProc
 		command: ["sh", "-c", "df / | tail -1"]
 		stdout: SplitParser {
 			onRead: data => {
 				if (!data) return
-				var parts = data.trim().split(/\s+/)
-				var percentStr = parts[4] || "0%"
-				diskUsage = parseInt(percentStr.replace('%', '')) || 0
+				const parts = data.trim().split(/\s+/)
+				const percentStr = parts[4] || "0%"
+				root.diskUsage = parseInt(percentStr.replace('%', '')) || 0
 			}
 		}
-		Component.onCompleted: running = true
 	}
 
-	//volume level
-	Process {
-		id: volProc
-		command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var match = data.match(/Volume:\s*([\d.]+)/)
-				if (match) {
-					volumeLevel = Math.round(parseFloat(match[1]) * 100)
+	// ---- volume (Pipewire service) ----
+	function refreshVolume() {
+		root.volumeLevel = root.audioSink ? Math.round(root.audioSink.volume * 100) : 0
+	}
+	Connections {
+		target: root.audioSink
+		function onVolumesChanged() { root.refreshVolume() }
+		function onMutedChanged() { root.refreshVolume() }
+	}
+	onAudioSinkChanged: root.refreshVolume()
+
+	// ---- battery (UPower service) ----
+	function refreshBattery() {
+		const dev = root.batteryDevice
+		if (dev && dev.isPresent) {
+			root.batteryLevel = Math.round(dev.percentage)
+			root.batteryStatus = dev.state
+		} else {
+			root.batteryLevel = -1
+			root.batteryStatus = -1
+		}
+	}
+	Connections {
+		target: root.batteryDevice
+		function onPercentageChanged() { root.refreshBattery() }
+		function onStateChanged() { root.refreshBattery() }
+	}
+	onBatteryDeviceChanged: root.refreshBattery()
+
+	// ---- network (NetworkManager service) ----
+	function refreshNetwork() {
+		root.networkType = "offline"
+		root.wifiSSID = ""
+		root.wifiSignal = 0
+		const devices = Networking.devices.values
+		for (let i = 0; i < devices.length; i++) {
+			if (devices[i].type === DeviceType.Wired && devices[i].connected) {
+				root.networkType = "ethernet"
+				root.wifiSSID = "Wired"
+				root.wifiSignal = 100
+				return
+			}
+		}
+		for (let i = 0; i < devices.length; i++) {
+			const dev = devices[i]
+			if (dev.type !== DeviceType.Wifi) continue
+			const networks = dev.networks.values
+			for (let j = 0; j < networks.length; j++) {
+				if (networks[j].connected) {
+					root.networkType = "wifi"
+					root.wifiSSID = networks[j].name || ""
+					root.wifiSignal = Math.min(100, Math.round(networks[j].signalStrength))
+					return
 				}
 			}
 		}
-		Component.onCompleted: running = true
 	}
 
-	//battery level + charging status
-	Process {
-		id: battProc
-		command: ["sh", "-c", "cap=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -1); st=$(cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -1); echo \"$cap $st\""]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var parts = data.trim().split(/\s+/)
-				batteryLevel = parseInt(parts[0]) || 0
-				batteryStatus = parts[1] || "Unknown"
+	// ---- media (Mpris service) ----
+	function refreshMediaPlayer() {
+		const players = Mpris.players.values
+		for (let i = 0; i < players.length; i++) {
+			if (players[i].isPlaying) {
+				root.mediaPlayer = players[i]
+				return
 			}
 		}
-		Component.onCompleted: running = true
+		root.mediaPlayer = players.length > 0 ? players[0] : null
 	}
 
-	//network: ethernet (priority) or wifi ssid + signal strength
-	Process {
-		id: wifiProc
-		command: ["sh", "-c", "eth=$(nmcli -t -f DEVICE,TYPE,STATE device status | awk -F: '$2==\"ethernet\" && $3==\"connected\"{print $1; exit}'); if [ -n \"$eth\" ]; then econn=$(nmcli -t -f GENERAL.CONNECTION device show \"$eth\" 2>/dev/null | cut -d: -f2); echo \"ethernet|$econn|0\"; else dev=$(nmcli -t -f DEVICE,TYPE device status | awk -F: '$2==\"wifi\"{print $1; exit}'); conn=$(nmcli -t -f GENERAL.CONNECTION device show \"$dev\" 2>/dev/null | cut -d: -f2); ssid=$(nmcli -t -f 802-11-wireless.ssid connection show \"$conn\" 2>/dev/null | cut -d: -f2); q=$(awk -v ifc=\"$dev:\" '$1==ifc{gsub(\"\\\\.\",\"\",$3); print $3}' /proc/net/wireless); echo \"wifi|$ssid|$q\"; fi"]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var parts = data.split("|")
-				networkType = parts[0] || "offline"
-				var label = parts[1] ? parts[1].trim() : ""
-				if (networkType === "ethernet") {
-					wifiSSID = label ? label : "Wired"
-					wifiSignal = 100
-				} else if (networkType === "wifi") {
-					wifiSSID = label ? label : "Offline"
-					var quality = parseInt(parts[2]) || 0
-					wifiSignal = Math.min(100, Math.round(quality / 70 * 100))
-				} else {
-					wifiSSID = "Offline"
-					wifiSignal = 0
-				}
-			}
+	function playerLabel() {
+		const p = root.mediaPlayer
+		if (!p) return "No media"
+		if (p.trackArtist && p.trackTitle) return p.trackArtist + " - " + p.trackTitle
+		return p.trackTitle || p.identity || "No media"
+	}
+
+	function playerIcon() {
+		return root.mediaPlayer && root.mediaPlayer.isPlaying ? "\uf04c" : "\uf04b"
+	}
+
+	// ---- polling timers (data sources only, no subprocess spawning) ----
+	Timer {
+		interval: 1000
+		running: true
+		repeat: true
+		onTriggered: root.updateCpu()
+	}
+
+	Timer {
+		interval: 5000
+		running: true
+		repeat: true
+		onTriggered: {
+			root.updateMem()
+			diskProc.running = true
 		}
-		Component.onCompleted: running = true
 	}
 
-	//playerctl metadata
-	Process {
-		id: playerProc
-		command: ["sh", "-c", "st=$(playerctl status 2>/dev/null); ar=$(playerctl metadata artist 2>/dev/null); ti=$(playerctl metadata title 2>/dev/null); echo \"$st|$ar|$ti\""]
-		stdout: SplitParser {
-			onRead: data => {
-				if (!data) return
-				var parts = data.split("|")
-				playerStatus = parts[0] || ""
-				playerArtist = parts[1] || ""
-				playerTitle = parts[2] || ""
-			}
-		}
-		Component.onCompleted: running = true
-	}
-
-	Process {
-		id: playPauseProc
-		command: ["playerctl", "play-pause"]
-		onExited: playerProc.running = true
-	}
-
-	Process {
-		id: nextTrackProc
-		command: ["playerctl", "next"]
-		onExited: playerProc.running = true
-	}
-
-	Process {
-		id: prevTrackProc
-		command: ["playerctl", "previous"]
-		onExited: playerProc.running = true
+	Timer {
+		interval: 3000
+		running: true
+		repeat: true
+		onTriggered: root.refreshNetwork()
 	}
 
 	Timer {
 		interval: 1000
 		running: true
 		repeat: true
-		onTriggered: playerProc.running = true
+		onTriggered: root.refreshMediaPlayer()
 	}
 
-	//window title
-	Process {
-		id: windowProc
-		command: ["sh", "-c", "hyprctl activewindow -j | jq -r '.title // empty'"]
-		stdout: SplitParser {
-			onRead: data => {
-				if (data && data.trim()) {
-					activeWindow = data.trim()
-				}
-			}
-		}
-		Component.onCompleted: running = true
+	Component.onCompleted: {
+		root.updateCpu()
+		root.updateMem()
+		root.refreshVolume()
+		root.refreshBattery()
+		root.refreshNetwork()
+		root.refreshMediaPlayer()
+		diskProc.running = true
 	}
 
-	//system stat timers
-	Timer {
-		interval: 2000
-		running: true
-		repeat: true
-		onTriggered: {
-			cpuProc.running = true
-			memProc.running = true
-			diskProc.running = true
-			volProc.running = true
-			battProc.running = true
-			wifiProc.running = true
-		}
-	}
-
-	//event based update for window
-	Connections {
-		target: Hyprland
-		function onRawEvent(event) {
-			windowProc.running = true
-		}
-	}
-
-	//backup for window
-	Timer {
-		interval: 200
-		running: true
-		repeat: true
-		onTriggered: {
-			windowProc.running = true
-		}
-	}
-
-	//layout from here onwards
+	// ---- layout ----
 	Variants {
 		model: Quickshell.screens
 
@@ -278,41 +263,55 @@ Scope {
 				right: true
 			}
 
-			implicitHeight: 30
-			color: Config.colors.base
+			implicitHeight: Config.bar.height
+			color: "transparent"
 
 			margins {
-				top: 0
+				top: 6
 				bottom: 0
-				left: 0
-				right: 0
+				left: 8
+				right: 8
 			}
 
-			Rectangle {
+			MCard {
 				anchors.fill: parent
-				color: Config.colors.base
+				color: Config.mat.surfaceContainer
+				radius: Config.bar.radius
+				elevation: Config.mat.elevation.low
 
 				RowLayout {
 					anchors.fill: parent
-					spacing: 0
+					anchors.leftMargin: 8
+					anchors.rightMargin: 12
+					spacing: 2
 
-					Item { width: 4 }
-
+					// workspaces
 					Repeater {
-						model: 10 
+						model: 10
 
-						Rectangle {
-							Layout.preferredWidth: 20
-							Layout.preferredHeight: parent.height
-							color: "transparent"
+						Item {
+							id: wsItem
+							Layout.preferredWidth: 28
+							Layout.preferredHeight: Config.bar.chipHeight
+							Layout.topMargin: (Config.bar.height - Config.bar.chipHeight) / 2
+							Layout.bottomMargin: (Config.bar.height - Config.bar.chipHeight) / 2
 
 							property var workspace: Hyprland.workspaces.values.find(ws => ws.id === index + 1) ?? null
 							property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
 							property bool hasWindows: workspace !== null
 
+							Rectangle {
+								id: wsBg
+								anchors.fill: parent
+								radius: 8
+								color: parent.isActive ? Config.mat.primaryContainer : "transparent"
+								Behavior on color { ColorAnimation { duration: 120 } }
+							}
+
 							Text {
 								text: index === 9 ? "0" : index + 1
-								color: parent.isActive ? Config.colors.sapphire : (parent.hasWindows ? Config.colors.sapphire : Config.colors.subtext0)
+								color: parent.isActive ? Config.mat.onPrimaryContainer
+									: (parent.hasWindows ? Config.mat.primary : Config.mat.onSurfaceVariant)
 								font.pixelSize: Config.bar.fontSize
 								font.family: Config.bar.fontFamily
 								font.bold: true
@@ -320,15 +319,17 @@ Scope {
 							}
 
 							Rectangle {
-								width: 20
-								height: 2
-								color: parent.isActive ? Config.colors.mauve : ""
-								anchors.horizontalCenter: parent.horizontalCenter
-								anchors.bottom: parent.bottom
+								anchors.fill: parent
+								radius: 8
+								color: wsMouse.pressed ? Config.mat.statePressed
+									: (wsMouse.containsMouse ? Config.mat.stateHover : "transparent")
+								Behavior on color { ColorAnimation { duration: 120 } }
 							}
 
 							MouseArea {
+								id: wsMouse
 								anchors.fill: parent
+								hoverEnabled: true
 								onClicked: Hyprland.dispatch("workspace " + (index + 1))
 							}
 						}
@@ -338,19 +339,19 @@ Scope {
 						Layout.preferredWidth: 1
 						Layout.preferredHeight: 16
 						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 4
-						Layout.rightMargin: 4
-						color: Config.colors.overlay0
+						Layout.leftMargin: 8
+						Layout.rightMargin: 8
+						color: Config.mat.outlineVariant
 					}
 
 					Text {
-						text: activeWindow
-						color: Config.colors.mauve
+						text: root.activeWindowTitle
+						color: Config.mat.onSurfaceVariant
 						font.pixelSize: Config.bar.fontSize
 						font.family: Config.bar.fontFamily
-						font.bold: true
-						Layout.maximumWidth: 320
-						Layout.leftMargin: 8
+						Layout.alignment: Qt.AlignVCenter
+						Layout.maximumWidth: 300
+						Layout.leftMargin: 4
 						elide: Text.ElideRight
 						maximumLineCount: 1
 					}
@@ -358,12 +359,42 @@ Scope {
 					// Expanding spacer to push right-side modules
 					Item { Layout.fillWidth: true }
 
-					Text {
-						text: "  " + cpuUsage + "%"
-						color: Config.colors.yellow
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
+					MStat {
+						icon: "\uf4bc"
+						label: cpuUsage + "%"
+						iconColor: Config.colors.yellow
+					}
+
+					MStat {
+						icon: "\uefc5"
+						label: memUsage + "%"
+						iconColor: Config.colors.peach
+					}
+
+					MStat {
+						icon: "\uf0a0"
+						label: diskUsage + "%"
+						iconColor: Config.colors.blue
+					}
+
+					MStat {
+						icon: "\uf027"
+						label: volumeLevel + "%"
+						iconColor: Config.colors.mauve
+					}
+
+					MStat {
+						visible: root.batteryLevel >= 0
+						icon: root.batteryIcon()
+						label: batteryLevel + "%"
+						iconColor: Config.colors.green
+					}
+
+					MStat {
+						icon: root.wifiIcon()
+						label: wifiSSID
+						iconColor: Config.colors.teal
+						Layout.maximumWidth: 170
 					}
 
 					Rectangle {
@@ -371,163 +402,86 @@ Scope {
 						Layout.preferredHeight: 16
 						Layout.alignment: Qt.AlignVCenter
 						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
-					}
-
-					Text {
-						text: "  " + memUsage + "%"
-						color: Config.colors.peach
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-					}
-
-					Rectangle {
-						Layout.preferredWidth: 1
-						Layout.preferredHeight: 16
-						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
-					}
-
-					Text {
-						text: "  " + diskUsage + "%"
-						color: Config.colors.blue
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-					}
-
-					Rectangle {
-						Layout.preferredWidth: 1
-						Layout.preferredHeight: 16
-						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
-					}
-
-					Text {
-						text: "  " + volumeLevel + "%"
-						color: Config.colors.mauve
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-					}
-
-					Rectangle {
-						Layout.preferredWidth: 1
-						Layout.preferredHeight: 16
-						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
-					}
-
-					Text {
-						text: root.batteryIcon() + "  " + batteryLevel + "%"
-						color: Config.colors.green
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-					}
-
-					Rectangle {
-						Layout.preferredWidth: 1
-						Layout.preferredHeight: 16
-						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
-					}
-
-					Text {
-						text: root.wifiIcon() + "  " + wifiSSID
-						color: Config.colors.teal
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-						elide: Text.ElideRight
-						Layout.maximumWidth: 160
-					}
-
-					Rectangle {
-						Layout.preferredWidth: 1
-						Layout.preferredHeight: 16
-						Layout.alignment: Qt.AlignVCenter
-						Layout.leftMargin: 8
-						Layout.rightMargin: 8
-						color: Config.colors.overlay0
+						Layout.rightMargin: 6
+						color: Config.mat.outlineVariant
 					}
 
 					Text {
 						id: clockText
-						text: Qt.formatDateTime(new Date(), "ddd, MMM dd - HH:mm")
-						color: Config.colors.sapphire
+						text: Qt.formatDateTime(new Date(), "HH:mm")
+						color: Config.mat.onSurface
 						font.pixelSize: Config.bar.fontSize
 						font.family: Config.bar.fontFamily
 						font.bold: true
-						Layout.rightMargin: 4
+						Layout.alignment: Qt.AlignVCenter
+						Layout.leftMargin: 4
+						Layout.rightMargin: 6
 
 						Timer {
 							interval: 1000
 							running: true
 							repeat: true
-							onTriggered: clockText.text = Qt.formatDateTime(new Date(), "ddd, MMM dd - HH:mm")
+							onTriggered: clockText.text = Qt.formatDateTime(new Date(), "HH:mm")
 						}
 					}
+				}
+			}
 
-					Item { width: 4 }
+			// center media chip
+			MCard {
+				id: mediaPill
+				anchors.horizontalCenter: parent.horizontalCenter
+				anchors.verticalCenter: parent.verticalCenter
+				height: Config.bar.chipHeight + 4
+				width: Math.min(mediaRow.implicitWidth, 400)
+				radius: Config.mat.radius.lg
+				color: Config.mat.surfaceContainerHigh
+				elevation: Config.mat.elevation.medium
+				visible: root.mediaPlayer !== null
+
+				MouseArea {
+					anchors.fill: parent
+					acceptedButtons: Qt.LeftButton
+					onClicked: {
+						if (root.mediaPlayer) root.mediaPlayer.togglePlaying()
+					}
+					onWheel: (wheel) => {
+						if (wheel.angleDelta.y > 0) {
+							if (root.mediaPlayer) root.mediaPlayer.next()
+						} else {
+							if (root.mediaPlayer) root.mediaPlayer.previous()
+						}
+						wheel.accepted = true
+					}
 				}
 
 				RowLayout {
-					id: playerRow
-					anchors.centerIn: parent
-					spacing: 6
+					id: mediaRow
+					anchors.fill: parent
+					anchors.leftMargin: 4
+					anchors.rightMargin: 12
+					spacing: 4
 
-					Text {
-						text: root.playerIcon()
-						color: Config.colors.sky
-						font.pixelSize: Config.bar.fontSize
-						font.family: Config.bar.fontFamily
-						font.bold: true
-						Layout.rightMargin: 3
+					MButton {
+						id: playBtn
+						icon: root.playerIcon()
+						fgColor: Config.mat.onSurface
+						size: 28
+						radius: 14
+						onClicked: {
+							if (root.mediaPlayer) root.mediaPlayer.togglePlaying()
+						}
 					}
 
 					Text {
 						text: root.playerLabel()
-						color: Config.colors.sky
+						color: Config.mat.onSurfaceVariant
 						font.pixelSize: Config.bar.fontSize
 						font.family: Config.bar.fontFamily
-						font.bold: true
 						elide: Text.ElideRight
-						Layout.maximumWidth: 260
-					}
-				}
-
-				Rectangle {
-					width: playerRow.width
-					height: 2
-					color: Config.colors.sky
-					anchors.horizontalCenter: playerRow.horizontalCenter
-					anchors.top: playerRow.bottom
-					anchors.topMargin: 4
-				}
-
-				MouseArea {
-					anchors.fill: playerRow
-					anchors.margins: -6
-					acceptedButtons: Qt.LeftButton
-					onClicked: playPauseProc.running = true
-					onWheel: (wheel) => {
-						if (wheel.angleDelta.y > 0) {
-							nextTrackProc.running = true
-						} else {
-							prevTrackProc.running = true
-						}
-						wheel.accepted = true
+						Layout.alignment: Qt.AlignVCenter
+						Layout.maximumWidth: 340
+						Layout.fillWidth: true
 					}
 				}
 			}

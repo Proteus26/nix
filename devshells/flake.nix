@@ -170,6 +170,7 @@
               pkgs.maven
               pkgs.gradle
               pkgs.jdt-language-server
+              pkgs.google-java-format
             ];
 
             shellHook = ''
