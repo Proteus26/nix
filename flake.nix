@@ -1,5 +1,5 @@
 {
-  description = "NixOS Configuration";
+  description = "Dendritic NixOS configuration";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -13,37 +13,51 @@
       url = "github:viperML/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      home-manager,
-      nh,
-      ...
-    }@inputs:
+    inputs@{ self, nixpkgs, flake-parts, home-manager, nh, ... }:
     let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
+      # Single source of truth for identity, shared by every module system
+      # (NixOS modules + home-manager modules) via specialArgs.
+      hostspec = {
+        hostname = "nix";
+        username = "proteus";
+        stateVersion = "26.05";
+        system = "x86_64-linux";
       };
     in
-    {
-      nixosConfigurations."nix" = nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/nix
-          home-manager.nixosModules.home-manager
-        ];
-      };
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ hostspec.system ];
 
-      homeConfigurations."proteus@nix" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [ ./home ];
-        extraSpecialArgs = { inherit inputs; };
+      perSystem =
+        { system, ... }:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config = {
+              allowUnfree = true;
+              cudaSupport = true;
+            };
+          };
+        in
+        {
+          _module.args.pkgs = pkgs;
+
+          devShells = import ./devshells { inherit pkgs; };
+        };
+
+      flake = {
+        nixosConfigurations."${hostspec.hostname}" = nixpkgs.lib.nixosSystem {
+          system = hostspec.system;
+          specialArgs = { inherit hostspec inputs; };
+          modules = [
+            ./hosts/nix
+            home-manager.nixosModules.home-manager
+          ];
+        };
       };
     };
 }
