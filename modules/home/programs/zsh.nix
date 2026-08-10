@@ -10,8 +10,9 @@ in
     programs.zsh = {
       enable = true;
       enableCompletion = true;
-      enableAutosuggestions = true;
-      enableSyntaxHighlighting = true;
+
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
 
       history = {
         size = 10000;
@@ -32,7 +33,7 @@ in
         df = "df -h";
       };
 
-      initExtra = ''
+      initContent = ''
         compdef eza=ls
 
         devshell() {

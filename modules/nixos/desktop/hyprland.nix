@@ -5,8 +5,7 @@ let
 in
 {
   imports = [
-    # Hyprland needs the desktop portal; pulling it here keeps the
-    # dependency declared by the feature itself (dendritic).
+    # Hyprland needs the desktop portal, pulled in by the feature itself.
     ./portal.nix
   ];
 

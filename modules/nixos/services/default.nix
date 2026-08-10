@@ -8,5 +8,6 @@
     ./power.nix
     ./printing.nix
     ./ssh.nix
+    ./upower.nix
   ];
 }

@@ -14,13 +14,7 @@ import "config.js" as Config
 Scope {
 	id: root
 
-	// ---------------------------------------------------------------
-	// CPU / memory: read straight from /proc via FileView instead of
-	// spawning `sh -c head/free` every tick. procfs doesn't support
-	// inotify, so we still reload on a timer, but this avoids forking
-	// a shell + coreutils process twice a second, which is the
-	// expensive part.
-	// ---------------------------------------------------------------
+	// CPU / memory: read straight from /proc via FileView instead of forking a shell.
 	property int cpuUsage: 0
 	property int memUsage: 0
 	property var lastCpuIdle: 0
@@ -88,11 +82,7 @@ Scope {
 		}
 	}
 
-	// ---------------------------------------------------------------
-	// Disk: no native Quickshell API for filesystem usage, so this is
-	// still a Process - but disk usage barely moves minute to minute,
-	// so it's polled far less often than everything else.
-	// ---------------------------------------------------------------
+	// Disk: no native Quickshell API, so use a Process polled infrequently.
 	property int diskUsage: 0
 
 	Process {
@@ -116,10 +106,7 @@ Scope {
 		onTriggered: diskProc.running = true
 	}
 
-	// ---------------------------------------------------------------
-	// Volume: native Pipewire binding. No polling at all - the value
-	// updates the instant the sink changes.
-	// ---------------------------------------------------------------
+	// Volume: native Pipewire binding, no polling.
 	readonly property var audioSink: Pipewire.defaultAudioSink
 	readonly property int volumeLevel: (audioSink && audioSink.ready && audioSink.audio)
 		? Math.round(audioSink.audio.volume * 100) : 0
@@ -129,10 +116,7 @@ Scope {
 		objects: root.audioSink ? [root.audioSink] : []
 	}
 
-	// ---------------------------------------------------------------
-	// Battery: native UPower binding, also event driven, no polling.
-	// percentage is already a 0-100 double from UPower.
-	// ---------------------------------------------------------------
+	// Battery: native UPower binding, event driven, no polling.
 	readonly property var battery: UPower.displayDevice
 	readonly property bool batteryPresent: battery ? battery.isPresent : false
 	readonly property int batteryLevel: battery ? Math.round(battery.percentage) : 0
@@ -177,12 +161,7 @@ Scope {
 		return text
 	}
 
-	// ---------------------------------------------------------------
-	// Media: native MPRIS binding replaces playerctl entirely. The old
-	// version forked playerctl three times a second (status/artist/
-	// title) on a 1s timer plus once per play/pause/next/prev click -
-	// this is now a direct DBus property binding with zero polling.
-	// ---------------------------------------------------------------
+	// Media: native MPRIS binding, replaces playerctl entirely.
 	readonly property var mprisPlayers: Mpris.players
 	readonly property var activePlayer: (mprisPlayers && mprisPlayers.values.length > 0)
 		? (mprisPlayers.values.find(p => p.isPlaying) || mprisPlayers.values[0])
@@ -210,24 +189,12 @@ Scope {
 		if (activePlayer && activePlayer.canGoPrevious) activePlayer.previous()
 	}
 
-	// ---------------------------------------------------------------
-	// Window title: the zwlr-foreign-toplevel-management protocol via
-	// ToplevelManager, replacing `hyprctl activewindow -j | jq` which
-	// used to run on a 200ms backup timer AND on every Hyprland event -
-	// easily the single most wasteful part of the old bar. This is a
-	// plain reactive property, no process, no polling.
-	// ---------------------------------------------------------------
+	// Window title: reactive foreign-toplevel protocol, no polling.
 	readonly property string activeWindowTitle: ToplevelManager.activeToplevel
 		? (ToplevelManager.activeToplevel.title || "")
 		: ""
 
-	// ---------------------------------------------------------------
-	// Network: Quickshell's NetworkManager binding (Quickshell.Networking)
-	// is still new enough that its wifi/access-point API isn't stable
-	// across versions yet, so this stays a Process for now - just
-	// polled much less often (5s instead of 2s) since SSID/signal
-	// rarely change tick to tick.
-	// ---------------------------------------------------------------
+	// Network: Quickshell's NetworkManager API isn't stable yet, so use a Process.
 	property string wifiSSID: ""
 	property int wifiSignal: 0
 	property string networkType: "offline"
@@ -304,11 +271,7 @@ Scope {
 		return parts.join("  ·  ")
 	}
 
-	// ---------------------------------------------------------------
-	// Layout - minimal, segmented, near-black. Each group of related
-	// info floats as its own small rounded block with a gap between,
-	// rather than one continuous filled bar.
-	// ---------------------------------------------------------------
+	// Layout: minimal, segmented, near-black.
 	Variants {
 		model: Quickshell.screens
 
@@ -478,8 +441,8 @@ Scope {
 									color: root.batteryState === UPowerDeviceState.Charging
 										? Config.colors.good
 										: (root.batteryLevel <= 15 ? Config.colors.bad : Config.colors.border)
-									anchors.bottom: parent.bottom
-									anchors.bottomMargin: -3
+									Layout.alignment: Qt.AlignBottom
+									Layout.bottomMargin: -3
 								}
 							}
 

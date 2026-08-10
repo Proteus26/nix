@@ -5,9 +5,7 @@
     ./graphics.nix
   ];
 
-  # Intel CPU: fetch + install microcode updates.
+  # Intel CPU microcode + periodic NVMe TRIM.
   hardware.enableRedistributableFirmware = true;
-
-  # Periodic TRIM for the NVMe SSD.
   services.fstrim.enable = true;
 }

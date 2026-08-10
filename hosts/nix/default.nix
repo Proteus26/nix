@@ -13,8 +13,7 @@
     ../../modules/nixos
   ];
 
-  # Identity (single source of truth, shared with home-manager via
-  # home-manager.extraSpecialArgs below).
+  # Identity, shared with home-manager via extraSpecialArgs below.
   system.stateVersion = hostspec.stateVersion;
   networking.hostName = hostspec.hostname;
 
@@ -24,8 +23,6 @@
     172.16.91.125  hpc02.sharanga.local hpc02
   '';
 
-  # Feature flags: the host only toggles what it wants. Dependencies are
-  # pulled in by the modules themselves (e.g. hyprland enables portal).
   features = {
     desktop = {
       hyprland.enable = true;
@@ -59,14 +56,13 @@
       power.enable = true;
       printing.enable = true;
       ssh.enable = true;
+      upower.enable = true;
     };
 
     virtualisation.docker.enable = true;
   };
 
   home-manager = {
-    # Share the system pkgs instance (so nixpkgs.config.allowUnfree etc.
-    # apply to home-manager) and build user packages into the user profile.
     useGlobalPkgs = true;
     useUserPackages = true;
 

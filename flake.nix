@@ -20,8 +20,7 @@
   outputs =
     inputs@{ self, nixpkgs, flake-parts, home-manager, nh, ... }:
     let
-      # Single source of truth for identity, shared by every module system
-      # (NixOS modules + home-manager modules) via specialArgs.
+			# Identity shared by every module system
       hostspec = {
         hostname = "nix";
         username = "proteus";

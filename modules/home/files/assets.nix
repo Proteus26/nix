@@ -3,7 +3,7 @@
 let
   cfg = config.features.home.files.assets;
 
-  # Catppuccin Mocha, mauve accent (matches the vendored theme this replaced).
+  # Catppuccin Mocha, mauve accent.
   catppuccinGtk = pkgs.catppuccin-gtk.override {
     variant = "mocha";
     accents = [ "mauve" ];
@@ -12,7 +12,6 @@ let
 
   gtkThemeName = "catppuccin-mocha-mauve-standard";
 
-  # Open-source macOS cursors.
   appleCursor = pkgs.apple-cursor;
   cursorThemeName = "macOS";
 in
