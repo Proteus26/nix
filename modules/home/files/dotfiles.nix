@@ -8,7 +8,6 @@ in
 
   config = lib.mkIf cfg.enable {
     xdg.configFile = {
-      "hypr".source = ../config/hypr;
       "nwg-look".source = ../config/nwg-look;
       "qt5ct".source = ../config/qt5ct;
       "qt6ct".source = ../config/qt6ct;

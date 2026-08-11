@@ -7,6 +7,8 @@ in
   options.features.home.programs.gtk.enable = lib.mkEnableOption "gtk";
 
   config = lib.mkIf cfg.enable {
+    dconf.settings."org.gnome.desktop.interface".color-scheme = "prefer-dark";
+
     gtk = {
       enable = true;
 
@@ -26,6 +28,10 @@ in
       font = {
         name = "Adwaita Sans";
         size = 11;
+      };
+
+      gtk4.extraConfig = {
+        gtk-application-prefer-dark-theme = "1";
       };
 
       gtk3.extraConfig = {
