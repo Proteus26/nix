@@ -32,7 +32,7 @@ in
             text = ''cmd[update:10000] echo -e "$(date +"%A, %B %d")"'';
             color = "rgba(227, 227, 227, 0.7)";
             font_size = 25;
-            font_family = "Inter Display Bold";
+            font_family = "Rubik Bold";
             position = "0, 250";
             halign = "center";
             valign = "center";
@@ -42,7 +42,7 @@ in
             text = ''cmd[update:10000] echo "<span>$(date +"%I:%M")</span>"'';
             color = "rgba(227, 227, 227, 0.7)";
             font_size = 120;
-            font_family = "Inter Display Bold";
+            font_family = "Rubik Bold";
             position = "0, 150";
             halign = "center";
             valign = "center";
@@ -52,7 +52,7 @@ in
             text = "    $USER";
             color = "rgba(231, 231, 231, 0.8)";
             font_size = 18;
-            font_family = "Inter Display Bold";
+            font_family = "Rubik Bold";
             position = "0, -50";
             halign = "center";
             valign = "center";
@@ -92,7 +92,7 @@ in
             text = ''cmd[update:10000] sh -c '[ -f /sys/class/power_supply/BAT0/capacity ] || exit; cap=$(cat /sys/class/power_supply/BAT0/capacity); if [ "$cap" -ge 90 ]; then icon="󰁹"; elif [ "$cap" -ge 75 ]; then icon="󰂁"; elif [ "$cap" -ge 50 ]; then icon="󰁿"; elif [ "$cap" -ge 25 ]; then icon="󰁼"; else icon="󰁺"; fi; status=$(cat /sys/class/power_supply/BAT0/status); [ "$status" = "Charging" ] && icon="󰂄"; echo "$icon $cap%"'' + "'";
             color = "rgba(227, 227, 227, 0.7)";
             font_size = 16;
-            font_family = "Inter Display Bold";
+            font_family = "Rubik Bold";
             position = "-20, 20";
             halign = "right";
             valign = "bottom";
@@ -128,7 +128,7 @@ in
             check_color = "rgba(255, 255, 255, 1)";
             font_color = "rgb(200, 200, 200)";
             fade_on_empty = false;
-            font_family = "Inter Display Bold";
+            font_family = "Rubik Bold";
             placeholder_text = ''<i><span foreground="##ffffff99">Password</span></i>'';
             hide_input = false;
             position = "0, -130";

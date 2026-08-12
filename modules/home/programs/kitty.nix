@@ -10,7 +10,7 @@ in
     programs.kitty = {
       enable = true;
 
-      theme = "Catppuccin-Mocha";
+      themeFile = "Catppuccin-Mocha";
 
       settings = {
         background_opacity = 1.0;

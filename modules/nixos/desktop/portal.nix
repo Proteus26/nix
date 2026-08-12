@@ -28,5 +28,14 @@ in
         };
       };
     };
+
+    systemd.user.services.xdg-desktop-portal = {
+      unitConfig = lib.mkForce {
+        Description = "Portal service";
+        PartOf = lib.mkForce [ ];
+        Requisite = lib.mkForce [ ];
+        After = lib.mkForce [ ];
+      };
+    };
   };
 }
