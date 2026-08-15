@@ -3,6 +3,7 @@
 {
   imports = [
     ./btop.nix
+    ./firefox.nix
     ./git.nix
     ./gtk.nix
     ./hyprland.nix
@@ -10,7 +11,6 @@
     ./hyprpaper.nix
     ./kitty.nix
     ./mpv.nix
-    ./quickshell.nix
     ./zsh.nix
   ];
 }

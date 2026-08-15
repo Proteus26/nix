@@ -38,7 +38,10 @@
 
     hardware.graphics.enable = true;
 
-    networking.enable = true;
+    networking = {
+      enable = true;
+      openPorts = [ 411 8000 8080 ];
+    };
 
     programs = {
       appimage.enable = true;

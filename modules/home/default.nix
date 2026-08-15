@@ -20,10 +20,10 @@
     programs.mpv.enable = true;
     programs.btop.enable = true;
     programs.gtk.enable = true;
+    programs.firefox.enable = true;
     programs.hyprland.enable = true;
     programs.hyprlock.enable = true;
     programs.hyprpaper.enable = true;
-    programs.quickshell.enable = true;
     files.dotfiles.enable = true;
     files.assets.enable = true;
   };

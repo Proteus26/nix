@@ -58,11 +58,11 @@ in
         export LD_LIBRARY_PATH=/usr/local/cuda/lib64''${LD_LIBRARY_PATH:+:''${LD_LIBRARY_PATH}}
       '';
 
-      oh-my-zsh = {
-        enable = true;
-        theme = "robbyrussell";
-        plugins = [ "git" ];
-      };
+oh-my-zsh = {
+          enable = true;
+          theme = "robbyrussell";
+          plugins = [ "git" ];
+        };
 
       plugins = [
         {
