@@ -5,6 +5,7 @@
     ./btop.nix
     ./firefox.nix
     ./git.nix
+    ./guitarix.nix
     ./gtk.nix
     ./hyprland.nix
     ./hyprlock.nix

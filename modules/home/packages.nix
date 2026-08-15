@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.home.packages;
@@ -16,6 +21,7 @@ in
       tmux
       opencode
       nil
+      nixfmt
       lua-language-server
 
       # CLI tools
@@ -47,6 +53,7 @@ in
       stremio-linux-shell
       pavucontrol
       eiskaltdcpp
+      helvum
     ];
   };
 }

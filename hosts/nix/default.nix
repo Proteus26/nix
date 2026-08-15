@@ -40,7 +40,7 @@
 
     networking = {
       enable = true;
-      openPorts = [ 411 8000 8080 ];
+      openPorts = [ 22 411 8000 8080 ];
     };
 
     programs = {

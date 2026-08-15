@@ -20,6 +20,7 @@
     programs.mpv.enable = true;
     programs.btop.enable = true;
     programs.gtk.enable = true;
+    programs.guitarix.enable = true;
     programs.firefox.enable = true;
     programs.hyprland.enable = true;
     programs.hyprlock.enable = true;

@@ -8,6 +8,7 @@
       "networkmanager"
       "wheel"
       "docker"
+      "audio"
     ];
     shell = pkgs.zsh;
   };
