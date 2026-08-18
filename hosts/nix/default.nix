@@ -26,6 +26,7 @@
   features = {
     desktop = {
       hyprland.enable = true;
+      sddm.enable = true;
     };
 
     environment = {
@@ -40,7 +41,12 @@
 
     networking = {
       enable = true;
-      openPorts = [ 22 411 8000 8080 ];
+      openPorts = [
+        22
+        411
+        8000
+        8080
+      ];
     };
 
     programs = {
