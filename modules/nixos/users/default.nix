@@ -1,4 +1,10 @@
-{ config, lib, pkgs, hostspec, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  hostspec,
+  ...
+}:
 
 {
   users.users.${hostspec.username} = {
@@ -9,6 +15,7 @@
       "wheel"
       "docker"
       "audio"
+      "input"
     ];
     shell = pkgs.zsh;
   };

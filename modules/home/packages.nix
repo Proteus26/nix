@@ -32,6 +32,7 @@ in
       wireguard-tools
       jq
       playerctl
+      ffmpeg
 
       # WM / Desktop related
       hyprpaper
@@ -54,6 +55,7 @@ in
       pavucontrol
       eiskaltdcpp
       helvum
+      krita
     ];
   };
 }
