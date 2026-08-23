@@ -15,6 +15,11 @@
     };
 
     flake-parts.url = "github:hercules-ci/flake-parts";
+
+    figma-linux-next = {
+      url = "github:arximus88/figma-linux-next";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =

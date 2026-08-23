@@ -38,7 +38,6 @@
     filesystems.mounts.enable = true;
 
     hardware.graphics.enable = true;
-    hardware.wacom.enable = true;
 
     networking = {
       enable = true;

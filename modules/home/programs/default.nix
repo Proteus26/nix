@@ -3,6 +3,7 @@
 {
   imports = [
     ./btop.nix
+    ./figma-linux-next.nix
     ./firefox.nix
     ./git.nix
     ./guitarix.nix

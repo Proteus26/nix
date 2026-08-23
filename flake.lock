@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "figma-linux-next": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786093704,
+        "narHash": "sha256-iZ7v4qxG9DTK9IVVS7cJqZDPR3EwgUJEPGxaPuc+JN8=",
+        "owner": "arximus88",
+        "repo": "figma-linux-next",
+        "rev": "bba0496beeb8fa9043edbd5f55e01a411c1e5c43",
+        "type": "github"
+      },
+      "original": {
+        "owner": "arximus88",
+        "repo": "figma-linux-next",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -91,6 +111,7 @@
     },
     "root": {
       "inputs": {
+        "figma-linux-next": "figma-linux-next",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "nh": "nh",
