@@ -3,6 +3,7 @@
 {
   imports = [
     ./graphics.nix
+    ./keyboards.nix
   ];
 
   # Intel CPU microcode + periodic NVMe TRIM.

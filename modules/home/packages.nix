@@ -54,8 +54,9 @@ in
       stremio-linux-shell
       pavucontrol
       eiskaltdcpp
-      helvum
       krita
+      loupe
+      brave
     ];
   };
 }

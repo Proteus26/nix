@@ -37,7 +37,10 @@
 
     filesystems.mounts.enable = true;
 
-    hardware.graphics.enable = true;
+    hardware = {
+      graphics.enable = true;
+      keyboards.enable = true;
+    };
 
     networking = {
       enable = true;
