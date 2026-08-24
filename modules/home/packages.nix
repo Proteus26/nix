@@ -27,6 +27,7 @@ in
       # CLI tools
       wget
       unzip
+      unrar
       eza
       ripgrep
       wireguard-tools

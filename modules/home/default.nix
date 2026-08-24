@@ -1,4 +1,10 @@
-{ config, lib, pkgs, hostspec, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  hostspec,
+  ...
+}:
 
 {
   home.username = hostspec.username;
@@ -20,7 +26,7 @@
     programs.mpv.enable = true;
     programs.btop.enable = true;
     programs.gtk.enable = true;
-    programs.guitarix.enable = true;
+    programs.guitar-fx.enable = true;
     programs.firefox.enable = true;
     programs.figma-linux-next.enable = true;
     programs.hyprland.enable = true;
