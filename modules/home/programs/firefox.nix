@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.home.programs.firefox;
@@ -17,11 +22,12 @@ in
         path = "ej87vux4.default";
 
         settings = {
-          "gfx.webrender.software" = true;
+          "gfx.webrender.all" = true;
+          "layers.acceleration.force-enabled" = true;
 
-          "media.ffmpeg.vaapi.enabled" = true;
-          "media.hardware-video-decoding.enabled" = true;
-          "media.mediacapabilities.hardware" = true;
+          "media.ffmpeg.vaapi.enabled" = false;
+          "media.hardware-video-decoding.enabled" = false;
+          "media.mediacapabilities.hardware" = false;
 
           "font.default" = "sans-serif";
           "font.name.sans-serif.x-western" = "";

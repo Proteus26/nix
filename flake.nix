@@ -10,7 +10,7 @@
     };
 
     nh = {
-      url = "github:viperML/nh";
+      url = "github:nix-community/nh";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -23,9 +23,16 @@
   };
 
   outputs =
-    inputs@{ self, nixpkgs, flake-parts, home-manager, nh, ... }:
+    inputs@{
+      self,
+      nixpkgs,
+      flake-parts,
+      home-manager,
+      nh,
+      ...
+    }:
     let
-			# Identity shared by every module system
+      # Identity shared by every module system
       hostspec = {
         hostname = "nix";
         username = "proteus";
@@ -43,7 +50,6 @@
             inherit system;
             config = {
               allowUnfree = true;
-              cudaSupport = true;
             };
           };
         in
@@ -61,6 +67,17 @@
             ./hosts/nix
             home-manager.nixosModules.home-manager
           ];
+        };
+
+        homeConfigurations."${hostspec.username}" = home-manager.lib.homeManagerConfiguration {
+          pkgs = import nixpkgs {
+            system = hostspec.system;
+            config = {
+              allowUnfree = true;
+            };
+          };
+          extraSpecialArgs = { inherit hostspec inputs; };
+          modules = [ ./modules/home ];
         };
       };
     };

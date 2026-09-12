@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.environment.fonts;
@@ -12,6 +17,7 @@ in
         inter
         rubik
         nerd-fonts.roboto-mono
+        nerd-fonts.monaspace
         nerd-fonts.symbols-only
         noto-fonts
         noto-fonts-cjk-sans
@@ -37,6 +43,7 @@ in
           ];
           monospace = [
             "RobotoMono Nerd Font"
+            "MonaspiceNe Nerd Font"
             "Noto Sans Mono CJK JP"
             "Noto Color Emoji"
           ];

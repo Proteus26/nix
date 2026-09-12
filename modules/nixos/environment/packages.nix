@@ -8,7 +8,7 @@ in
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      inputs.nh.packages.${pkgs.system}.default
+      inputs.nh.packages.${pkgs.stdenv.hostPlatform.system}.default
 
       # Compilers and languages (build tools stay system-wide)
       gcc
@@ -25,14 +25,9 @@ in
 
       # Service-adjacent tools
       dconf
+      gsettings-desktop-schemas
       udisks2
       gvfs
-
-      # Qt theming (needs to be discoverable system-wide)
-      libsForQt5.qt5ct
-      kdePackages.qt6ct
-      libsForQt5.qtstyleplugin-kvantum
-      kdePackages.qtstyleplugin-kvantum
     ];
   };
 }

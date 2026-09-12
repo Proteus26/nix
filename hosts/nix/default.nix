@@ -32,6 +32,7 @@
     environment = {
       env.enable = true;
       packages.enable = true;
+      qt.enable = true;
       fonts.enable = true;
     };
 
@@ -45,10 +46,15 @@
     networking = {
       enable = true;
       openPorts = [
-        22
         411
         8000
         8080
+      ];
+      openPortRanges = [
+        {
+          from = 1714;
+          to = 1764;
+        }
       ];
     };
 

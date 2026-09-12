@@ -8,7 +8,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home.packages = [
-      inputs.figma-linux-next.packages.${pkgs.system}.default
+      inputs.figma-linux-next.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
   };
 }

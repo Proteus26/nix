@@ -8,5 +8,7 @@ in
 
   config = lib.mkIf cfg.enable {
     services.openssh.enable = true;
+
+    networking.firewall.allowedTCPPorts = [ 22 ];
   };
 }

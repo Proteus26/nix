@@ -56,8 +56,8 @@ in
       pavucontrol
       eiskaltdcpp
       krita
-      loupe
       brave
+      kdePackages.kdeconnect-kde
     ];
   };
 }

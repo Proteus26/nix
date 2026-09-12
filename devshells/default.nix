@@ -27,24 +27,6 @@ in
     shellHook = zshHook;
   };
 
-  # CUDA
-  cuda = pkgs.mkShell {
-    nativeBuildInputs = [
-      pkgs.cmake
-      pkgs.clang-tools
-    ];
-    buildInputs = [
-      pkgs.cudaPackages.cudatoolkit
-    ];
-
-    shellHook = ''
-      export CUDA_PATH=${pkgs.cudaPackages.cudatoolkit}
-      export LD_LIBRARY_PATH=${pkgs.cudaPackages.cudatoolkit}/lib:$LD_LIBRARY_PATH
-
-      ${zshHook}
-    '';
-  };
-
   # Webslop
   web = pkgs.mkShell {
     nativeBuildInputs = [
