@@ -23,6 +23,8 @@ in
       nil
       nixfmt
       lua-language-server
+      stylua
+      shfmt
 
       # CLI tools
       wget
