@@ -50,18 +50,13 @@
         8000
         8080
       ];
-      openPortRanges = [
-        {
-          from = 1714;
-          to = 1764;
-        }
-      ];
     };
 
     programs = {
       appimage.enable = true;
       dconf.enable = true;
       direnv.enable = true;
+      kdeconnect.enable = true;
       nix-ld.enable = true;
       steam.enable = true;
       zsh.enable = true;

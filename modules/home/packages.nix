@@ -59,7 +59,6 @@ in
       eiskaltdcpp
       krita
       brave
-      kdePackages.kdeconnect-kde
     ];
   };
 }
