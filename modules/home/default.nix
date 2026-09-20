@@ -32,6 +32,8 @@
     programs.hyprland.enable = true;
     programs.hyprlock.enable = true;
     programs.hyprpaper.enable = true;
+    programs.kdeconnect.enable = true;
+    programs.xdg.enable = true;
     files.dotfiles.enable = true;
     files.assets.enable = true;
   };

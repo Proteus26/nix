@@ -11,8 +11,10 @@
     ./hyprland.nix
     ./hyprlock.nix
     ./hyprpaper.nix
+    ./kdeconnect.nix
     ./kitty.nix
     ./mpv.nix
+    ./xdg.nix
     ./zsh.nix
   ];
 }
