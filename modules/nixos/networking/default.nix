@@ -38,6 +38,8 @@ in
   config = lib.mkIf cfg.enable {
     networking.networkmanager.enable = true;
 
+    networking.firewall.trustedInterfaces = [ "wlo1" ];
+
     networking.firewall.enable = true;
     networking.firewall.allowedTCPPorts = cfg.openPorts;
     networking.firewall.allowedUDPPorts = cfg.openPorts;

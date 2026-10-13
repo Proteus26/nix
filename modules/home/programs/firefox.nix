@@ -22,21 +22,11 @@ in
         path = "ej87vux4.default";
 
         settings = {
-          "gfx.webrender.all" = true;
-          "layers.acceleration.force-enabled" = true;
-
           "browser.download.dir" = "${config.home.homeDirectory}/downloads";
           "browser.download.folderList" = 2;
           "browser.download.useDownloadDir" = true;
 
-          "media.ffmpeg.vaapi.enabled" = false;
-          "media.hardware-video-decoding.enabled" = false;
-          "media.mediacapabilities.hardware" = false;
-
-          "font.default" = "sans-serif";
-          "font.name.sans-serif.x-western" = "";
-          "font.name.serif.x-western" = "";
-          "font.name.monospace.x-western" = "";
+          "media.hardware-video-decoding.force-enabled" = true;
         };
       };
     };

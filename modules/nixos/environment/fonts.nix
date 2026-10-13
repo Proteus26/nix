@@ -24,6 +24,7 @@ in
         noto-fonts-cjk-serif
         noto-fonts-color-emoji
         liberation_ttf
+        corefonts
       ];
 
       fontconfig = {

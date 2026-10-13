@@ -20,6 +20,9 @@ in
         publicShare = "${config.home.homeDirectory}";
         templates = "${config.home.homeDirectory}";
         videos = "${config.home.homeDirectory}";
+        extraConfig = {
+          XDG_PROJECTS_DIR = "${config.home.homeDirectory}/projects";
+        };
       };
     };
   };

@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.hardware.graphics;
@@ -15,6 +20,11 @@ in
     hardware.graphics = {
       enable = true;
       enable32Bit = true;
+      extraPackages = with pkgs; [
+        intel-media-driver
+        libva-vdpau-driver
+        libvdpau-va-gl
+      ];
     };
 
     services.xserver.videoDrivers = [ "nvidia" ];

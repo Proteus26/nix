@@ -15,4 +15,5 @@ in
   python = import ./python.nix { inherit pkgs zshHook; };
   rust = import ./rust.nix { inherit pkgs zshHook; };
   java = import ./java.nix { inherit pkgs zshHook; };
+  lean = import ./lean.nix { inherit pkgs zshHook; };
 }
