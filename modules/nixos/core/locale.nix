@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ ... }:
 
 {
   time.timeZone = "Asia/Kolkata";

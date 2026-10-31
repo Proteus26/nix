@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 let
   cfg = config.features.programs.nix-ld;
@@ -8,6 +8,5 @@ in
 
   config = lib.mkIf cfg.enable {
     programs.nix-ld.enable = true;
-    programs.nix-ld.libraries = with pkgs; [ ];
   };
 }
