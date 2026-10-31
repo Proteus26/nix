@@ -6,6 +6,7 @@ mkShell name {
     pkgs.go
     pkgs.gopls
     pkgs.delve
-    pkgs.go-tools
+    pkgs.gotools
+    pkgs.golangci-lint
   ];
 }

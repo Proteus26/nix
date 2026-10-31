@@ -24,6 +24,8 @@ in
       lua-language-server
       stylua
       shfmt
+      shellcheck
+      statix
 
       # CLI tools
       wget
