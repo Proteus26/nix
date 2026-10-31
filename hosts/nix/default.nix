@@ -26,7 +26,7 @@
   features = {
     desktop = {
       hyprland.enable = true;
-      sddm.enable = true;
+      noctalia-greeter.enable = true;
     };
 
     environment = {
