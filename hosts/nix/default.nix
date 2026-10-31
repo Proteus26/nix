@@ -1,15 +1,8 @@
-{
-  config,
-  lib,
-  pkgs,
-  hostspec,
-  inputs,
-  ...
-}:
+{ hostspec, inputs, ... }:
 
 {
   imports = [
-    ../../hardware-configuration.nix
+    ./hardware-configuration.nix
     ../../modules/nixos
   ];
 

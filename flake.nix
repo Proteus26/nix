@@ -1,5 +1,5 @@
 {
-  description = "Dendritic NixOS configuration";
+  description = "NixOS + home-manager configuration (Hyprland)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -19,7 +19,6 @@
 
   outputs =
     inputs@{
-      self,
       nixpkgs,
       flake-parts,
       home-manager,
@@ -33,29 +32,27 @@
         stateVersion = "26.05";
         system = "x86_64-linux";
       };
+
+      # One nixpkgs instance for devshells and standalone home-manager.
+      pkgs = import nixpkgs {
+        inherit (hostspec) system;
+        config.allowUnfree = true;
+      };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ hostspec.system ];
 
-      perSystem =
-        { system, ... }:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-            config = {
-              allowUnfree = true;
-            };
-          };
-        in
-        {
-          _module.args.pkgs = pkgs;
+      perSystem = {
+        _module.args.pkgs = pkgs;
 
-          devShells = import ./devshells { inherit pkgs; };
-        };
+        devShells = import ./devshells { inherit pkgs; };
+
+        # `nix fmt` formats every .nix file in the repo.
+        formatter = pkgs.nixfmt-tree;
+      };
 
       flake = {
-        nixosConfigurations."${hostspec.hostname}" = nixpkgs.lib.nixosSystem {
-          system = hostspec.system;
+        nixosConfigurations.${hostspec.hostname} = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit hostspec inputs; };
           modules = [
             ./hosts/nix
@@ -63,13 +60,10 @@
           ];
         };
 
-        homeConfigurations."${hostspec.username}" = home-manager.lib.homeManagerConfiguration {
-          pkgs = import nixpkgs {
-            system = hostspec.system;
-            config = {
-              allowUnfree = true;
-            };
-          };
+        # Standalone home-manager (no sudo). Shares modules/home with the
+        # NixOS module above; prefer `nh os switch` so the two don't fight.
+        homeConfigurations.${hostspec.username} = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
           extraSpecialArgs = { inherit hostspec inputs; };
           modules = [ ./modules/home ];
         };
