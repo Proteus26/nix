@@ -1,7 +1,25 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.home.programs.gtk;
+
+  # Catppuccin Mocha, mauve accent.
+  catppuccinGtk = pkgs.catppuccin-gtk.override {
+    variant = "mocha";
+    accents = [ "mauve" ];
+    size = "standard";
+  };
+
+  cursor = {
+    name = "macOS";
+    package = pkgs.apple-cursor;
+    size = 24;
+  };
 in
 {
   options.features.home.programs.gtk.enable = lib.mkEnableOption "gtk";
@@ -9,20 +27,23 @@ in
   config = lib.mkIf cfg.enable {
     dconf.settings."org.gnome.desktop.interface".color-scheme = "prefer-dark";
 
+    # Sets XCURSOR_*, gtk.cursorTheme and ~/.icons/default so GTK, Qt and XWayland agree.
+    home.pointerCursor = cursor // {
+      enable = true;
+      gtk.enable = true;
+      x11.enable = true;
+    };
+
     gtk = {
       enable = true;
 
       theme = {
         name = "catppuccin-mocha-mauve-standard";
+        package = catppuccinGtk;
       };
 
       iconTheme = {
         name = "Adwaita";
-      };
-
-      cursorTheme = {
-        name = "macOS";
-        size = 24;
       };
 
       font = {

@@ -1,36 +1,13 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
 let
   cfg = config.features.home.files.assets;
-
-  # Catppuccin Mocha, mauve accent.
-  catppuccinGtk = pkgs.catppuccin-gtk.override {
-    variant = "mocha";
-    accents = [ "mauve" ];
-    size = "standard";
-  };
-
-  gtkThemeName = "catppuccin-mocha-mauve-standard";
-
-  appleCursor = pkgs.apple-cursor;
-  cursorThemeName = "macOS";
 in
 {
   options.features.home.files.assets.enable = lib.mkEnableOption "assets";
 
+  # GTK theme and cursor are installed by gtk.nix via their `package` options.
   config = lib.mkIf cfg.enable {
-    home.file = {
-      ".themes/${gtkThemeName}" = {
-        source = "${catppuccinGtk}/share/themes/${gtkThemeName}";
-        recursive = true;
-      };
-      ".icons/${cursorThemeName}" = {
-        source = "${appleCursor}/share/icons/${cursorThemeName}";
-        recursive = true;
-      };
-      "pictures/mayforest.jpg" = {
-        source = ./../assets/pictures/mayforest.jpg;
-      };
-    };
+    home.file."pictures/mayforest.jpg".source = ../assets/pictures/mayforest.jpg;
   };
 }
