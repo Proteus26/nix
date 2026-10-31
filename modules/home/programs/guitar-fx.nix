@@ -17,7 +17,7 @@ let
       postBuild = ''
         rm $out/bin/${name}
         makeWrapper ${pkg}/bin/${name} $out/bin/${name} \
-          --prefix LD_LIBRARY_PATH : /run/current-system/sw/lib/pipewire
+          --prefix LD_LIBRARY_PATH : ${pkgs.pipewire.jack}/lib
       '';
     };
 in
