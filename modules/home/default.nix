@@ -28,6 +28,7 @@
     programs.gtk.enable = true;
     programs.guitar-fx.enable = true;
     programs.firefox.enable = true;
+    programs.vivaldi.enable = true;
     programs.figma-linux-next.enable = true;
     programs.hyprland.enable = true;
     programs.noctalia.enable = true;
