@@ -9,8 +9,7 @@
     ./git.nix
     ./gtk.nix
     ./hyprland.nix
-    ./hyprlock.nix
-    ./hyprpaper.nix
+    ./noctalia.nix
     ./kdeconnect.nix
     ./kitty.nix
     ./mpv.nix

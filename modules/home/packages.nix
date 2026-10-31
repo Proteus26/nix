@@ -19,7 +19,6 @@ in
       tree-sitter
       neovim
       tmux
-      opencode
       nil
       nixfmt
       lua-language-server
@@ -36,13 +35,11 @@ in
       jq
       playerctl
       ffmpeg
+      uv
 
       # WM / Desktop related
-      hyprpaper
-      quickshell
-      hyprshot
+      hyprpicker
       wl-clipboard
-      cliphist
       libnotify
       nwg-look
 
@@ -59,6 +56,9 @@ in
       eiskaltdcpp
       krita
       brave
+      t3code
+      claude-code
+      qimgv
     ];
   };
 }
