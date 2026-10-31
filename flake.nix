@@ -9,11 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nh = {
-      url = "github:nix-community/nh";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     figma-linux-next = {
@@ -28,7 +23,6 @@
       nixpkgs,
       flake-parts,
       home-manager,
-      nh,
       ...
     }:
     let

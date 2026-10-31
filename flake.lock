@@ -58,26 +58,6 @@
         "type": "github"
       }
     },
-    "nh": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790766414,
-        "narHash": "sha256-PVnIyRpdHtGnc/m918Xs/pIlILzRekqywlU7qecS5ug=",
-        "owner": "nix-community",
-        "repo": "nh",
-        "rev": "25da175ed91650523ac7a8b7aa38aedb736546bc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nh",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1793110635,
@@ -114,7 +94,6 @@
         "figma-linux-next": "figma-linux-next",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
-        "nh": "nh",
         "nixpkgs": "nixpkgs"
       }
     }

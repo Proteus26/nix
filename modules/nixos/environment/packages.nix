@@ -1,4 +1,9 @@
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.features.environment.packages;
@@ -6,10 +11,10 @@ in
 {
   options.features.environment.packages.enable = lib.mkEnableOption "system packages";
 
+  # nh comes from programs.nh (core/nix.nix); dconf, udisks2, gvfs and
+  # gsettings schemas come from the services/programs that enable them.
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      inputs.nh.packages.${pkgs.stdenv.hostPlatform.system}.default
-
       # Compilers and languages (build tools stay system-wide)
       gcc
       python3
@@ -21,13 +26,6 @@ in
       man-pages
       man-pages-posix
       openssl
-      glib
-
-      # Service-adjacent tools
-      dconf
-      gsettings-desktop-schemas
-      udisks2
-      gvfs
     ];
   };
 }
