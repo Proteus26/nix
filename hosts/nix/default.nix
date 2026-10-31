@@ -45,6 +45,7 @@
 
     networking = {
       enable = true;
+      hotspot.enable = true; # NM connection "nixspot" on wlo1
       openPorts = [
         411
         8000
