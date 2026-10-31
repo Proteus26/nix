@@ -39,21 +39,18 @@ in
       };
 
       initContent = ''
-                compdef eza=ls
+        compdef eza=ls
 
-                devshell() {
-                  if [ -z "$1" ]; then
-                    echo "Usage: devshell <shell_name>"
-                    echo "Example: devshell cpp"
-                  else
-                    nix develop "/home/proteus/nix#$1"
-                  fi
-                }
+        devshell() {
+          if [ -z "$1" ]; then
+            echo "Usage: devshell <shell_name>"
+            echo "Example: devshell cpp"
+          else
+            nix develop "/home/proteus/nix#$1"
+          fi
+        }
 
-                export EDITOR='nvim'
-                export PATH="$HOME/.local/bin:$PATH"
-                export PATH="/usr/local/go/bin/:$PATH"
-        				export PATH=~/.npm-global/bin:$PATH
+        export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
       '';
 
       oh-my-zsh = {
@@ -65,15 +62,12 @@ in
       plugins = [
         {
           name = "fzf-tab";
-          src = pkgs.fetchFromGitHub {
-            owner = "Aloxaf";
-            repo = "fzf-tab";
-            rev = "v1.3.0";
-            sha256 = "sha256-8atbysoOyCBW2OYKmdc91x9V/Mk3eyg3hvzvhJpQ32w=";
-          };
+          src = "${pkgs.zsh-fzf-tab}/share/fzf-tab";
         }
       ];
     };
+
+    home.sessionVariables.EDITOR = "nvim";
 
     programs.zoxide = {
       enable = true;
