@@ -9,7 +9,9 @@ in
   config = lib.mkIf cfg.enable {
     programs.noctalia = {
       enable = true;
-      systemd.enable = true;
+      # Started by exec_cmd("noctalia") in ~/.config/hypr/hyprland.lua; a systemd
+      # unit as well would just fail with "noctalia is already running".
+      systemd.enable = false;
 
       settings = {
         theme = {
@@ -20,7 +22,7 @@ in
 
         wallpaper = {
           enabled = true;
-          default.path = "/home/proteus/pictures/mayforest.jpg";
+          default.path = "${config.home.homeDirectory}/pictures/mayforest.jpg";
         };
       };
     };
