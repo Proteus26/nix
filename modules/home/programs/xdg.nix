@@ -20,9 +20,9 @@ in
         publicShare = "${config.home.homeDirectory}";
         templates = "${config.home.homeDirectory}";
         videos = "${config.home.homeDirectory}";
-        extraConfig = {
-          XDG_PROJECTS_DIR = "${config.home.homeDirectory}/projects";
-        };
+        # home-manager has a built-in `projects` dir defaulting to ~/Projects;
+        # with createDirectories that recreated ~/Projects on every switch.
+        projects = "${config.home.homeDirectory}/projects";
       };
     };
   };
