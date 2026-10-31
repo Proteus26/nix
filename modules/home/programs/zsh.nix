@@ -58,7 +58,11 @@ in
           RPROMPT="%F{blue}(''${DEVSHELL_NAME:-nix-shell})%f"
         fi
 
-        export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
+        # Only for top-level shells: inside a devshell the outer PATH (which
+        # already has these) comes after the devshell's tools, so they win.
+        if [ -z "$IN_NIX_SHELL" ]; then
+          export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
+        fi
       '';
 
       oh-my-zsh = {
