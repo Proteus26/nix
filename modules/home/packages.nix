@@ -55,7 +55,6 @@ in
       pavucontrol
       eiskaltdcpp
       krita
-      t3code
       claude-code
       qimgv
     ];

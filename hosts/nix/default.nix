@@ -59,6 +59,7 @@
     services = {
       audio.enable = true;
       bluetooth.enable = true;
+      keyring.enable = true;
       mounts.enable = true;
       power.enable = true;
       printing.enable = true;

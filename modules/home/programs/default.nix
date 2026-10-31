@@ -13,6 +13,7 @@
     ./kdeconnect.nix
     ./kitty.nix
     ./mpv.nix
+    ./t3code.nix
     ./vivaldi.nix
     ./xdg.nix
     ./zsh.nix
