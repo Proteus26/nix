@@ -1,6 +1,7 @@
-{ pkgs, zshHook }:
+{ pkgs, mkShell }:
 
-pkgs.mkShell {
+name:
+mkShell name {
   packages = [
     pkgs.gcc
     pkgs.gnumake
@@ -13,14 +14,8 @@ pkgs.mkShell {
     pkgs.gtest
   ];
 
-  CPATH = builtins.toString (
-    pkgs.lib.makeSearchPathOutput "dev" "include" [
-      pkgs.glibc.dev
-      pkgs.gcc.cc
-    ]
-  );
+  # Lets clangd find the glibc headers in files without a compile_commands.json.
+  CPATH = pkgs.lib.makeSearchPathOutput "dev" "include" [ pkgs.glibc ];
 
   CMAKE_EXPORT_COMPILE_COMMANDS = "1";
-
-  shellHook = zshHook;
 }

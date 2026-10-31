@@ -41,14 +41,22 @@ in
       initContent = ''
         compdef eza=ls
 
+        # Enter one of the devshells from this flake: `devshell cpp`.
+        # Runs zsh inside the shell instead of nix develop's default bash.
         devshell() {
+          local flake="''${NH_FLAKE:-$HOME/nix}"
           if [ -z "$1" ]; then
             echo "Usage: devshell <shell_name>"
-            echo "Example: devshell cpp"
-          else
-            nix develop "/home/proteus/nix#$1"
+            echo "Available: $(nix eval --raw "$flake#devShells.x86_64-linux" --apply 'd: toString (builtins.attrNames d)' 2>/dev/null)"
+            return 1
           fi
+          nix develop "$flake#$1" --command zsh
         }
+
+        # Show the active devshell on the right of the prompt.
+        if [ -n "$IN_NIX_SHELL" ]; then
+          RPROMPT="%F{blue}(''${DEVSHELL_NAME:-nix-shell})%f"
+        fi
 
         export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
       '';

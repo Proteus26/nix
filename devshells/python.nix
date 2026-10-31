@@ -1,6 +1,7 @@
-{ pkgs, zshHook }:
+{ pkgs, mkShell }:
 
-pkgs.mkShell {
+name:
+mkShell name {
   packages = [
     pkgs.python3
     pkgs.pyright
@@ -8,13 +9,13 @@ pkgs.mkShell {
     pkgs.uv
   ];
 
+  # Binary wheels (numpy, torch, ...) load their native libs through nix-ld,
+  # which is enabled system-wide.
   shellHook = ''
-    if [ -d ".venv" ]; then
+    if [ -f .venv/bin/activate ]; then
       source .venv/bin/activate
     else
-      echo "No .venv in \$PWD — create one with: uv venv .venv && source .venv/bin/activate"
+      echo "No .venv in $PWD — create one with: uv venv"
     fi
-
-    ${zshHook}
   '';
 }

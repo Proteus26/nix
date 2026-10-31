@@ -1,13 +1,11 @@
-# Go.
-{ pkgs, zshHook }:
+{ pkgs, mkShell }:
 
-pkgs.mkShell {
+name:
+mkShell name {
   packages = [
     pkgs.go
     pkgs.gopls
     pkgs.delve
     pkgs.go-tools
   ];
-
-  shellHook = zshHook;
 }

@@ -1,19 +1,27 @@
+# Per-language dev environments: `devshell <name>` (zsh function) or, per
+# project, an .envrc containing `use flake ~/nix#<name>` (direnv is enabled).
 { pkgs }:
 
 let
-  zshHook = ''
-    if [[ $- == *i* ]] && [ -z "$IN_NIX_SHELL_ZSH" ]; then
-      export IN_NIX_SHELL_ZSH=1
-      exec ${pkgs.zsh}/bin/zsh
-    fi
-  '';
+  # mkShell that records its name so the zsh prompt can show the active shell.
+  mkShell =
+    name: args:
+    pkgs.mkShell (
+      args
+      // {
+        inherit name;
+        DEVSHELL_NAME = name;
+      }
+    );
+
+  shells = [
+    "cpp"
+    "go"
+    "java"
+    "lean"
+    "python"
+    "rust"
+    "web"
+  ];
 in
-{
-  cpp = import ./cpp.nix { inherit pkgs zshHook; };
-  web = import ./web.nix { inherit pkgs zshHook; };
-  go = import ./go.nix { inherit pkgs zshHook; };
-  python = import ./python.nix { inherit pkgs zshHook; };
-  rust = import ./rust.nix { inherit pkgs zshHook; };
-  java = import ./java.nix { inherit pkgs zshHook; };
-  lean = import ./lean.nix { inherit pkgs zshHook; };
-}
+pkgs.lib.genAttrs shells (name: import ./${name}.nix { inherit pkgs mkShell; } name)

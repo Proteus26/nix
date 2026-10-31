@@ -1,6 +1,7 @@
-{ pkgs, zshHook }:
+{ pkgs, mkShell }:
 
-pkgs.mkShell {
+name:
+mkShell name {
   packages = [
     pkgs.jdk21
     pkgs.maven
@@ -9,5 +10,5 @@ pkgs.mkShell {
     pkgs.google-java-format
   ];
 
-  shellHook = zshHook;
+  JAVA_HOME = "${pkgs.jdk21}/lib/openjdk";
 }
