@@ -1,37 +1,21 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 
 let
   cfg = config.features.home.programs.t3code;
-
-  launcher = "${config.home.profileDirectory}/bin/t3code-desktop";
-
-  # t3code:// handler uses Exec=$APPIMAGE, else the bare Electron binary.
-  t3code = pkgs.symlinkJoin {
-    name = "t3code-${pkgs.t3code.version}";
-    paths = [ pkgs.t3code ];
-    nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-    postBuild = ''
-      wrapProgram $out/bin/t3code-desktop \
-        --set APPIMAGE ${launcher} \
-        --set-default T3CODE_DISABLE_AUTO_UPDATE 1 \
-        --prefix PATH : ${lib.makeBinPath [ pkgs.lsof ]}
-    '';
-  };
 in
 {
-  options.features.home.programs.t3code.enable = lib.mkEnableOption "T3 Code";
+  options.features.home.programs.t3code.enable =
+    lib.mkEnableOption "T3 Code (official AppImage in ~/applications)";
 
   config = lib.mkIf cfg.enable {
-    home.packages = [ t3code ];
-
-    programs.gh = {
-      enable = true;
-      settings.git_protocol = "ssh";
+    xdg.desktopEntries.t3code = {
+      name = "T3 Code";
+      comment = "Minimal web GUI for coding agents";
+      exec = "${config.home.homeDirectory}/applications/T3-Code.AppImage %U";
+      icon = "com.t3tools.T3Code";
+      categories = [ "Development" ];
+      terminal = false;
+      settings.StartupWMClass = "com.t3tools.T3Code";
     };
   };
 }

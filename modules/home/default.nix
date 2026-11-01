@@ -21,6 +21,7 @@
   features.home = {
     packages.enable = true;
     programs.git.enable = true;
+    programs.gh.enable = true;
     programs.zsh.enable = true;
     programs.kitty.enable = true;
     programs.mpv.enable = true;

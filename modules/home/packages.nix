@@ -38,6 +38,7 @@ in
       playerctl
       ffmpeg
       uv
+      lsof
 
       # WM / Desktop related
       hyprpicker
@@ -58,6 +59,7 @@ in
       eiskaltdcpp
       krita
       claude-code
+      antigravity-acp
       qimgv
     ];
   };

@@ -6,6 +6,7 @@
     ./btop.nix
     ./figma-linux-next.nix
     ./firefox.nix
+    ./gh.nix
     ./git.nix
     ./gtk.nix
     ./hyprland.nix
