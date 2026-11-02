@@ -27,6 +27,39 @@ in
       shellcheck
       statix
 
+      # Languages
+      gcc
+      gnumake
+      cmake
+      ninja
+      pkg-config
+      clang-tools
+      bear
+      gdb
+      gtest
+      go
+      gopls
+      delve
+      gotools
+      golangci-lint
+      maven
+      gradle
+      jdt-language-server
+      google-java-format
+      kotlin
+      kotlin-language-server
+      ktlint
+      elan
+      python3
+      pyright
+      ruff
+      rustup
+      openssl
+      nodejs_24
+      pnpm
+      typescript
+      typescript-language-server
+
       # CLI tools
       wget
       unzip

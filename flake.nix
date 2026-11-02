@@ -52,6 +52,11 @@
       };
 
       flake = {
+        lib.mergeDevShells = import ./devshells/merge.nix {
+          inherit pkgs;
+          shells = import ./devshells { inherit pkgs; };
+        };
+
         nixosConfigurations.${hostspec.hostname} = nixpkgs.lib.nixosSystem {
           specialArgs = { inherit hostspec inputs; };
           modules = [

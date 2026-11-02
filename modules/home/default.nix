@@ -12,6 +12,7 @@
   home.stateVersion = hostspec.stateVersion;
 
   imports = [
+    ./env.nix
     ./packages.nix
     ./programs
     ./files
@@ -19,6 +20,7 @@
 
   # Enable the home features this profile wants (each gated by its own module).
   features.home = {
+    env.enable = true;
     packages.enable = true;
     programs.git.enable = true;
     programs.gh.enable = true;
@@ -33,6 +35,7 @@
     programs.t3code.enable = true;
     programs.figma-linux-next.enable = true;
     programs.hyprland.enable = true;
+    programs.java.enable = true;
     programs.noctalia.enable = true;
     programs.kdeconnect.enable = true;
     programs.xdg.enable = true;

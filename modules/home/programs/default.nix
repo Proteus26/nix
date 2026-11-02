@@ -10,6 +10,7 @@
     ./git.nix
     ./gtk.nix
     ./hyprland.nix
+    ./java.nix
     ./noctalia.nix
     ./kdeconnect.nix
     ./kitty.nix

@@ -46,11 +46,15 @@ in
         devshell() {
           local flake="''${NH_FLAKE:-$HOME/nix}"
           if [ -z "$1" ]; then
-            echo "Usage: devshell <shell_name>"
+            echo "Usage: devshell <shell_name> [more shells...]"
             echo "Available: $(nix eval --raw "$flake#devShells.x86_64-linux" --apply 'd: toString (builtins.attrNames d)' 2>/dev/null)"
             return 1
           fi
-          nix develop "$flake#$1" --command zsh
+          if [ $# -eq 1 ]; then
+            nix develop "$flake#$1" --command zsh
+          else
+            nix develop --impure --expr "(builtins.getFlake \"path:$flake\").lib.mergeDevShells [ $(printf '"%s" ' "$@") ]" --command zsh
+          fi
         }
 
         # Show the active devshell on the right of the prompt.
@@ -78,8 +82,6 @@ in
         }
       ];
     };
-
-    home.sessionVariables.EDITOR = "nvim";
 
     programs.zoxide = {
       enable = true;

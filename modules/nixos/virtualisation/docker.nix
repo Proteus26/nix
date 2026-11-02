@@ -20,10 +20,8 @@ in
           buildkit = true;
         };
 
-        dns = [
-          "8.8.8.8"
-          "1.1.1.1"
-        ];
+        mtu = 1380;
+        default-network-opts.bridge."com.docker.network.driver.mtu" = "1380";
       };
 
       autoPrune = {
@@ -31,5 +29,12 @@ in
         dates = "weekly";
       };
     };
+
+    networking.firewall.extraCommands = ''
+      iptables -w -t mangle -A FORWARD -o wg0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+    '';
+    networking.firewall.extraStopCommands = ''
+      iptables -w -t mangle -D FORWARD -o wg0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu || true
+    '';
   };
 }
