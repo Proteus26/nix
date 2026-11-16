@@ -50,6 +50,11 @@ in
       default = "10.42.0.0/24";
       description = "IPv4 subnet NetworkManager hands out to hotspot clients (NM default for shared mode).";
     };
+    address = lib.mkOption {
+      type = lib.types.str;
+      default = "10.42.0.1";
+      description = "This machine's address on the hotspot.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -66,6 +71,12 @@ in
     # Everything else (DNS, LAN shares, ...) is accepted only from hotspot clients.
     networking.firewall.extraCommands = lib.mkIf cfg.hotspot.enable ''
       iptables -w -A nixos-fw -i ${cfg.hotspot.interface} -s ${cfg.hotspot.subnet} -j nixos-fw-accept
+      iptables -w -D OUTPUT -s ${cfg.hotspot.address} ! -o ${cfg.hotspot.interface} -j REJECT 2>/dev/null || true
+      iptables -w -A OUTPUT -s ${cfg.hotspot.address} ! -o ${cfg.hotspot.interface} -j REJECT
+    '';
+    # Keeps WebRTC (Vesktop) from routing local traffic via the hotspot address.
+    networking.firewall.extraStopCommands = lib.mkIf cfg.hotspot.enable ''
+      iptables -w -D OUTPUT -s ${cfg.hotspot.address} ! -o ${cfg.hotspot.interface} -j REJECT 2>/dev/null || true
     '';
 
     networking.firewall.allowedTCPPorts = cfg.openPorts;

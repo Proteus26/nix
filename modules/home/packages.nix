@@ -37,6 +37,7 @@ in
       bear
       gdb
       gtest
+      gtest.dev
       go
       gopls
       delve
@@ -56,6 +57,7 @@ in
       rustup
       openssl
       nodejs_24
+      bun
       pnpm
       typescript
       typescript-language-server

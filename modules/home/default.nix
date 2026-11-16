@@ -39,6 +39,7 @@
     programs.noctalia.enable = true;
     programs.kdeconnect.enable = true;
     programs.xdg.enable = true;
+    programs.zed.enable = true;
     files.dotfiles.enable = true;
     files.assets.enable = true;
   };

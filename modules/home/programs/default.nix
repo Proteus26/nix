@@ -18,6 +18,7 @@
     ./t3code.nix
     ./vivaldi.nix
     ./xdg.nix
+    ./zed.nix
     ./zsh.nix
   ];
 }
