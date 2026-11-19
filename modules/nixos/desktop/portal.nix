@@ -17,21 +17,7 @@ in
       extraPortals = with pkgs; [
         xdg-desktop-portal-gtk
       ];
-      config = {
-        common = {
-          default = [
-            "hyprland"
-            "gtk"
-          ];
-        };
-        hyprland = {
-          default = [
-            "hyprland"
-            "gtk"
-          ];
-          "org.freedesktop.impl.portal.Settings" = [ "gtk" ];
-        };
-      };
+      config.common.default = [ "gtk" ];
     };
 
     systemd.user.services.xdg-desktop-portal = {

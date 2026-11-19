@@ -29,7 +29,7 @@ in
 
       # Written to /var/lib/noctalia-greeter/greeter.toml; wins over Sync.
       settings = {
-        session.default = "Hyprland (uwsm-managed)";
+        session.default = "Mango (UWSM)";
         user.default = hostspec.username;
         cursor.size = 24;
         keyboard = {

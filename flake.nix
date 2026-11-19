@@ -1,5 +1,5 @@
 {
-  description = "NixOS + home-manager configuration (Hyprland)";
+  description = "NixOS + home-manager configuration (Mango)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

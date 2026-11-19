@@ -9,9 +9,10 @@
     ./gh.nix
     ./git.nix
     ./gtk.nix
-    ./hyprland.nix
     ./java.nix
+    ./kanshi.nix
     ./noctalia.nix
+    ./polkit.nix
     ./kdeconnect.nix
     ./kitty.nix
     ./mpv.nix

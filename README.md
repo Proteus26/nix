@@ -1,6 +1,6 @@
 # Nix
 
-NixOS + home-manager configuration for a Hyprland laptop (Intel + NVIDIA PRIME).
+NixOS + home-manager configuration for a Mango laptop (Intel + NVIDIA PRIME).
 
 ## Apply
 
@@ -17,7 +17,7 @@ Old generations are cleaned weekly by `nh clean` (keeps 5 and anything newer tha
 - `modules/home/` — home-manager modules, gated by `features.home.*`
 - `devshells/` — per-language dev environments
 
-Hyprland's own config lives in `~/.config/hypr` and is deliberately not managed here.
+Mango's own config lives in `~/.config/mango` and is deliberately not managed here.
 
 ## Devshells
 

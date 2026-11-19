@@ -18,7 +18,7 @@
 
   features = {
     desktop = {
-      hyprland.enable = true;
+      mango.enable = true;
       noctalia-greeter.enable = true;
     };
 

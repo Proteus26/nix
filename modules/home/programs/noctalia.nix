@@ -9,9 +9,7 @@ in
   config = lib.mkIf cfg.enable {
     programs.noctalia = {
       enable = true;
-      # Started by exec_cmd("noctalia") in ~/.config/hypr/hyprland.lua; a systemd
-      # unit as well would just fail with "noctalia is already running".
-      systemd.enable = false;
+      systemd.enable = true;
 
       settings = {
         theme = {

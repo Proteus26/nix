@@ -44,7 +44,7 @@ in
         zshconfig = "nvim ~/nix/modules/home/programs/zsh.nix";
         docker-dev = "docker compose --profile dev";
         docker-prod = "docker compose --profile prod";
-        ssh = "TERM=\"xterm-256color\" kitty +kitten ssh";
+        ssh = "TERM=\"xterm-256color\" kitten ssh";
         ls = "eza -a --icons=auto";
         ll = "eza -lh --icons=auto --git";
         la = "eza -lah --icons=auto --git";

@@ -34,9 +34,10 @@
     programs.vivaldi.enable = true;
     programs.t3code.enable = true;
     programs.figma-linux-next.enable = true;
-    programs.hyprland.enable = true;
     programs.java.enable = true;
+    programs.kanshi.enable = true;
     programs.noctalia.enable = true;
+    programs.polkit.enable = true;
     programs.kdeconnect.enable = true;
     programs.xdg.enable = true;
     programs.zed.enable = true;
