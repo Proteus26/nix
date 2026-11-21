@@ -96,6 +96,7 @@ in
       claude-code
       antigravity-acp
       qimgv
+      obs-studio
     ];
   };
 }
